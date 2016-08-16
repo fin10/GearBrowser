@@ -7,6 +7,7 @@
 #include <efl_extension.h>
 #include "gearbrowser.h"
 #include "search_layout.h"
+#include "favorite_layout.h"
 #include "common.h"
 
 typedef struct appdata {
@@ -14,7 +15,7 @@ typedef struct appdata {
 	Evas_Object* conform;
 	Evas_Object* navi;
 	Evas_Object* web;
-	bundle* search_result;
+	bundle* result;
 } appdata_s;
 
 static void
@@ -45,15 +46,33 @@ navi_search_cb(void* data, Elm_Object_Item* it)
 {
 	appdata_s* ad = data;
 	char* result = NULL;
-	bundle_get_str(ad->search_result, "result", &result);
+	bundle_get_str(ad->result, "result", &result);
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[navi_search_cb] result:%s", result);
 	if (result != NULL) {
 		ewk_view_url_set(ad->web, result);
 	}
 
 	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
-	bundle_free(ad->search_result);
-	ad->search_result = NULL;
+	bundle_free(ad->result);
+	ad->result = NULL;
+
+	return EINA_TRUE;
+}
+
+static Eina_Bool
+navi_favorite_cb(void* data, Elm_Object_Item* it)
+{
+	appdata_s* ad = data;
+	char* result = NULL;
+	bundle_get_str(ad->result, "result", &result);
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[navi_favorite_cb] result:%s", result);
+	if (result != NULL) {
+		ewk_view_url_set(ad->web, result);
+	}
+
+	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
+	bundle_free(ad->result);
+	ad->result = NULL;
 
 	return EINA_TRUE;
 }
@@ -79,8 +98,8 @@ web_search_cb(void *data, Evas_Object *obj, const char *emission, const char *so
 {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_search_cb]");
 	appdata_s* ad = data;
-	ad->search_result = bundle_create();
-	Elm_Object_Item* item = open_searchview(ad->navi, ad->conform, ad->search_result);
+	ad->result = bundle_create();
+	Elm_Object_Item* item = open_search_layout(ad->navi, ad->conform, ad->result);
 	elm_naviframe_item_pop_cb_set(item, navi_search_cb, ad);
 }
 
@@ -88,13 +107,19 @@ static void
 web_favorite_cb(void *data, Evas_Object *obj, const char *emission, const char *source)
 {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_favorite_cb]");
+	appdata_s* ad = data;
+	ad->result = bundle_create();
+	const char* title = ewk_view_title_get(ad->web);
+	const char* url = ewk_view_url_get(ad->web);
+	Elm_Object_Item* item = open_favorite_layout(ad->navi, ad->conform, ad->result, title, url);
+	elm_naviframe_item_pop_cb_set(item, navi_favorite_cb, ad);
 }
 
 static void
 open_webview(appdata_s* ad, Evas_Object* parent)
 {
 	char edj_path[PATH_MAX] = {0, };
-	app_get_resource("edje/web_view_layout.edj", edj_path);
+	app_get_resource("edje/web_layout.edj", edj_path);
 	dlog_print(DLOG_DEBUG, LOG_TAG, "path:%s", edj_path);
 
 	Evas_Object* layout = elm_layout_add(parent);

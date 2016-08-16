@@ -29,9 +29,9 @@ search_cb(void* data, Evas_Object* obj, const char* emission, const char* source
 }
 
 Elm_Object_Item*
-open_searchview(Evas_Object* navi, Evas_Object* parent, bundle* result)
+open_search_layout(Evas_Object* navi, Evas_Object* parent, bundle* result)
 {
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[open_searchview]");
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[open_search_layout]");
 	char edj_path[PATH_MAX] = {0, };
 	app_get_resource("edje/search_layout.edj", edj_path);
 	dlog_print(DLOG_DEBUG, LOG_TAG, "path:%s", edj_path);

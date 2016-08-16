@@ -169,7 +169,7 @@ collections {
             target: "part.web.btn.search";
          }
          program {
-            name: "program.web.btn.search.released";
+            name: "program.web.btn.searchreleased";
             source: "part.web.btn.search";
             signal: "mouse,up,1";
             action: STATE_SET "default" 0.0;
@@ -189,7 +189,6 @@ collections {
             action: STATE_SET "default" 0.0;
             target: "part.web.btn.favorite";
          }
-         
          program {
             name: "program.web.btn.back.clicked";
             source: "part.web.btn.back";
