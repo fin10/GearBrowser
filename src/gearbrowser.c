@@ -26,20 +26,15 @@ win_back_cb(void* data, Evas_Object* obj, void* event_info)
 {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[win_back_cb]");
 	appdata_s* ad = data;
-	/* Let window go to hide state. */
-	elm_win_lower(ad->win);
-//	Eina_List* items = elm_naviframe_items_get(ad->navi);
-//	if (items != NULL) {
-//		dlog_print(DLOG_DEBUG, LOG_TAG, "[win_back_cb] count:%d", items->accounting->count);
-//		dlog_print(DLOG_DEBUG, LOG_TAG, "[win_back_cb] items->data:%s", items->data);
-//		dlog_print(DLOG_DEBUG, LOG_TAG, "[win_back_cb] items->prev:%s", items->prev);
-//		dlog_print(DLOG_DEBUG, LOG_TAG, "[win_back_cb] items->next:%s", items->next);
-//	} else {
-//		dlog_print(DLOG_ERROR, LOG_TAG, "[win_back_cb] items is null.");
-//	}
-//
-//	Evas_Object* item = elm_naviframe_item_pop(ad->navi);
-//	dlog_print(DLOG_DEBUG, LOG_TAG, "[win_back_cb] item:%s", item);
+	Eina_List* items = elm_naviframe_items_get(ad->navi);
+	if (items != NULL) {
+		dlog_print(DLOG_DEBUG, LOG_TAG, "[win_back_cb] count:%d", items->accounting->count);
+		if (items->accounting->count == 1) {
+			elm_win_lower(ad->win);
+		} else {
+			elm_naviframe_item_pop(ad->navi);
+		}
+	}
 }
 
 static void
@@ -81,7 +76,6 @@ open_webview(appdata_s* ad, Evas_Object* parent)
 
 	Evas_Object* layout = elm_layout_add(parent);
 	elm_layout_file_set(layout, edj_path, "group.web");
-	elm_object_content_set(parent, layout);
 
 	Evas* evas = evas_object_evas_get(layout);
 	Evas_Object* web = ewk_view_add(evas);
@@ -124,6 +118,7 @@ create_base_gui(appdata_s* ad)
 
 	ad->navi = elm_naviframe_add(ad->conform);
 	elm_object_content_set(ad->conform, ad->navi);
+	open_webview(ad, ad->conform);
 
 	/* Show window after base gui is set up */
 	evas_object_show(ad->win);
@@ -139,7 +134,6 @@ app_create(void *data)
 	appdata_s *ad = data;
 
 	create_base_gui(ad);
-	open_webview(ad, ad->conform);
 
 	return true;
 }

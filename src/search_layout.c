@@ -31,7 +31,6 @@ open_searchview(Evas_Object* navi, Evas_Object* parent)
 
 	Evas_Object* layout = elm_layout_add(parent);
 	elm_layout_file_set(layout, edj_path, "group.search");
-	elm_object_content_set(parent, layout);
 
 	ad->entry = elm_entry_add(layout);
 	elm_object_part_content_set(layout, "part.search.entry", ad->entry);
