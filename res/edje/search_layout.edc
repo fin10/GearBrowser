@@ -1,0 +1,83 @@
+collections {
+   images {
+      image: "ic_search_white_24dp_2x.png" COMP;
+   }
+   
+   group {
+      name: "group.search";
+      parts {
+         part {
+            name: "part.search.title";
+            type: TEXT;
+            description {
+               state: "default" 0.0;
+               rel1.relative: 0.0 0.0;
+               rel2.relative: 1.0 0.2;
+               text {
+                  text: "Google";
+                  size: 24;
+               }
+            }
+         }
+         part {
+            name: "part.search.entry";
+            type: SWALLOW;
+            description {
+               state: "default" 0.0;
+               rel1.relative: 0.1 0.2;
+               rel2.relative: 0.75 0.35;
+            }
+         }
+         part {
+            name: "part.search.btn.search";
+            type: RECT;
+            description {
+               state: "default" 0.0;
+               rel1.relative: 0.75 0.2;
+               rel2.relative: 0.9 0.35;
+               color: 0 0 255 255;
+            }
+            description {
+               state: "pressed" 0.0;
+               inherit: "default" 0.0;
+               color: 0 0 255 127;
+            }
+         }
+         
+         part {
+            name: "part.search.btn.icon";
+            type: IMAGE;
+            mouse_events: 0;
+            description { 
+               state: "default" 0.0;
+               image.normal: "ic_search_white_24dp_2x.png";
+               rel1.relative: 0.75 0.2;
+               rel2.relative: 0.9 0.35;
+            }
+         }
+      }
+      programs {
+         program {
+            name: "program.search.btn.search.pressed";
+            source: "part.search.btn.search";
+            signal: "mouse,down,1";
+            action: STATE_SET "pressed" 0.0;
+            target: "part.search.btn.search";
+         }
+         program {
+            name: "program.search.btn.search.released";
+            source: "part.search.btn.search";
+            signal: "mouse,up,1";
+            action: STATE_SET "default" 0.0;
+            target: "part.search.btn.search";
+         }
+         program {
+            name: "program.search.btn.search.clicked";
+            source: "part.search.btn.search";
+            signal: "mouse,clicked,1";
+            action: SIGNAL_EMIT "signal.btn.search.clicked" "*";
+         }
+         
+      }
+   }
+}
