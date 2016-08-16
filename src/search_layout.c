@@ -1,25 +1,35 @@
 #include <Elementary.h>
 #include <dlog.h>
+#include <bundle.h>
 #include "search_layout.h"
 #include "common.h"
 
 typedef struct appdata {
 	Evas_Object* navi;
 	Evas_Object* entry;
+	bundle* result;
 } appdata_s;
+
+static const char* URL_SEARCH_GOOGLE = "https://www.google.co.kr/search?q=";
+static const char* URL_SEARCH_NAVER = "https://m.search.naver.com/search.naver?query=";
 
 static void
 search_cb(void* data, Evas_Object* obj, const char* emission, const char* source)
 {
 	appdata_s* ad = data;
 	const char* text = elm_entry_entry_get(ad->entry);
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[search_cb] %s", text);
+	int size = strlen(text) + strlen(URL_SEARCH_GOOGLE) + 1;
+	char* query = malloc(sizeof(char) * size);
+	snprintf(query, size, "%s%s", URL_SEARCH_GOOGLE, text);
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[search_cb] query:%s", query);
+
+	bundle_add_str(ad->result, "result", query);
 	elm_naviframe_item_pop(ad->navi);
 	free(ad);
 }
 
-void
-open_searchview(Evas_Object* navi, Evas_Object* parent)
+Elm_Object_Item*
+open_searchview(Evas_Object* navi, Evas_Object* parent, bundle* result)
 {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[open_searchview]");
 	char edj_path[PATH_MAX] = {0, };
@@ -28,6 +38,7 @@ open_searchview(Evas_Object* navi, Evas_Object* parent)
 
 	appdata_s* ad = malloc(sizeof(appdata_s));
 	ad->navi = navi;
+	ad->result = result;
 
 	Evas_Object* layout = elm_layout_add(parent);
 	elm_layout_file_set(layout, edj_path, "group.search");
@@ -37,5 +48,6 @@ open_searchview(Evas_Object* navi, Evas_Object* parent)
 	evas_object_show(ad->entry);
 
 	elm_object_signal_callback_add(layout, "signal.btn.search.clicked", "*", search_cb, ad);
-	elm_naviframe_item_simple_push(ad->navi, layout);
+
+	return elm_naviframe_item_simple_push(ad->navi, layout);
 }

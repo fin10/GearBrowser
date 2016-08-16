@@ -13,3 +13,4 @@ app_get_resource(const char *edj_file_in, char *edj_path_out)
 		free(res_path);
 	}
 }
+

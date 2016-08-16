@@ -2,6 +2,7 @@
 #include <Elementary.h>
 #include <EWebKit.h>
 #include <dlog.h>
+#include <bundle.h>
 #include <system_settings.h>
 #include <efl_extension.h>
 #include "gearbrowser.h"
@@ -12,6 +13,8 @@ typedef struct appdata {
 	Evas_Object* win;
 	Evas_Object* conform;
 	Evas_Object* navi;
+	Evas_Object* web;
+	bundle* search_result;
 } appdata_s;
 
 static void
@@ -37,6 +40,24 @@ win_back_cb(void* data, Evas_Object* obj, void* event_info)
 	}
 }
 
+static Eina_Bool
+navi_search_cb(void* data, Elm_Object_Item* it)
+{
+	appdata_s* ad = data;
+	char* result = NULL;
+	bundle_get_str(ad->search_result, "result", &result);
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[navi_search_cb] result:%s", result);
+	if (result != NULL) {
+		ewk_view_url_set(ad->web, result);
+	}
+
+	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
+	bundle_free(ad->search_result);
+	ad->search_result = NULL;
+
+	return EINA_TRUE;
+}
+
 static void
 web_back_cb(void *data, Evas_Object *obj, const char *emission, const char *source)
 {
@@ -58,7 +79,9 @@ web_search_cb(void *data, Evas_Object *obj, const char *emission, const char *so
 {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_search_cb]");
 	appdata_s* ad = data;
-	open_searchview(ad->navi, ad->conform);
+	ad->search_result = bundle_create();
+	Elm_Object_Item* item = open_searchview(ad->navi, ad->conform, ad->search_result);
+	elm_naviframe_item_pop_cb_set(item, navi_search_cb, ad);
 }
 
 static void
@@ -78,13 +101,13 @@ open_webview(appdata_s* ad, Evas_Object* parent)
 	elm_layout_file_set(layout, edj_path, "group.web");
 
 	Evas* evas = evas_object_evas_get(layout);
-	Evas_Object* web = ewk_view_add(evas);
-	elm_object_part_content_set(layout, "part.web", web);
-	ewk_view_url_set(web, "http://www.google.com");
-	evas_object_show(web);
+	ad->web = ewk_view_add(evas);
+	elm_object_part_content_set(layout, "part.web", ad->web);
+	ewk_view_url_set(ad->web, "http://www.google.com");
+	evas_object_show(ad->web);
 
-	elm_object_signal_callback_add(layout, "signal.btn.back.clicked", "*", web_back_cb, web);
-	elm_object_signal_callback_add(layout, "signal.btn.forward.clicked", "*", web_forward_cb, web);
+	elm_object_signal_callback_add(layout, "signal.btn.back.clicked", "*", web_back_cb, ad->web);
+	elm_object_signal_callback_add(layout, "signal.btn.forward.clicked", "*", web_forward_cb, ad->web);
 	elm_object_signal_callback_add(layout, "signal.btn.search.clicked", "*", web_search_cb, ad);
 	elm_object_signal_callback_add(layout, "signal.btn.favorite.clicked", "*", web_favorite_cb, ad);
 
