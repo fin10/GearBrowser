@@ -37,7 +37,6 @@ entry_layout_open(Evas_Object* navi, bundle* result) {
 		return NULL;
 	}
 
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[entry_layout_open]");
 	char edj_path[PATH_MAX] = {0, };
 	app_get_resource("edje/entry_layout.edj", edj_path);
 
@@ -45,16 +44,24 @@ entry_layout_open(Evas_Object* navi, bundle* result) {
 	elm_layout_file_set(layout, edj_path, "group.entry");
 
 	Evas_Object* entry = elm_entry_add(layout);
-	elm_object_part_content_set(layout, "part.entry", entry);
 	elm_entry_single_line_set(entry, EINA_TRUE);
 	elm_entry_scrollable_set(entry, EINA_TRUE);
-	elm_entry_input_panel_return_key_type_set(entry, ELM_INPUT_PANEL_RETURN_KEY_TYPE_SEARCH);
+	elm_scroller_policy_set(entry, ELM_SCROLLER_POLICY_OFF, ELM_SCROLLER_POLICY_AUTO);
+	evas_object_smart_callback_add(entry, "activated", entry_done_cb, NULL);
+
+	char* text = NULL;
+	bundle_get_str(result, "text", &text);
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[entry_layout_open] input:%s", text);
+	if (text != NULL) {
+		elm_entry_entry_set(entry, text);
+		elm_entry_cursor_end_set(entry);
+	}
+
+	elm_object_part_content_set(layout, "part.entry", entry);
 
 	gEntryData = malloc(sizeof(EntryData));
 	gEntryData->navi = navi;
 	gEntryData->result = result;
-
-	evas_object_smart_callback_add(entry, "activated", entry_done_cb, NULL);
 
 	return elm_naviframe_item_simple_push(navi, layout);
 }

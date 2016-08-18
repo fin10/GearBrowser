@@ -42,7 +42,9 @@ entry_result_cb(void* data, Elm_Object_Item* it) {
 	bundle_get_str(result, "result", &entry);
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[entry_result_cb] result:%s", entry);
 
-	elm_layout_text_set(gSearchData->layout, "part.search.text", entry);
+	if (entry != NULL) {
+		elm_layout_text_set(gSearchData->layout, "part.search.text", entry);
+	}
 
 	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
 	bundle_free(result);
@@ -52,7 +54,7 @@ entry_result_cb(void* data, Elm_Object_Item* it) {
 }
 
 static void
-search_button_click_cb(void* data, Evas_Object* obj, const char* emission, const char* source) {
+search_button_click_cb(void* data, Evas_Object* obj, void* event_info) {
 	const char* text = elm_layout_text_get(gSearchData->layout, "part.search.text");
 	if (text != NULL && strcmp(text, "")) {
 		if (startsWith("http://", text) || startsWith("https://", text)) {
@@ -77,6 +79,11 @@ entry_click_cb(void* data, Evas_Object* obj, const char* emission, const char* s
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[entry_click_cb] %s", emission);
 	if (!strcmp(emission, SIGNAL_ENTRY_BUTTON_CLICKED)) {
 		bundle* result = bundle_create();
+		const char* text = elm_layout_text_get(gSearchData->layout, "part.search.text");
+		if (text != NULL) {
+			bundle_add_str(result, "text", text);
+		}
+
 		Elm_Object_Item* item = entry_layout_open(gSearchData->navi, result);
 		elm_naviframe_item_pop_cb_set(item, entry_result_cb, result);
 	}
@@ -101,7 +108,6 @@ search_layout_open(Evas_Object* navi, bundle* result) {
 	elm_object_part_content_set(layout, "elm.swallow.button", button);
 	elm_object_text_set(button, "Search");
 	evas_object_smart_callback_add(button, "clicked", search_button_click_cb, NULL);
-	evas_object_show(button);
 
 	gSearchData = malloc(sizeof(SearchData));
 	gSearchData->navi = navi;
