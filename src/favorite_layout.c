@@ -4,7 +4,8 @@
 #include <app_preference.h>
 #include <json-glib.h>
 #include "favorite_layout.h"
-#include "common.h"
+#include "gearbrowser.h"
+#include "utils.h"
 
 static const char* PREF_KEY_FAVORITES = "pref_key_favorites";
 
@@ -87,7 +88,17 @@ get_favorites_n(const char* json)
 	{
 		JsonNode* root = json_parser_get_root(parser);
 		JsonArray* items = json_node_get_array(root);
-		dlog_print(DLOG_DEBUG, LOG_TAG, "[get_favorites_n] size:%d", json_array_get_length(items));
+		int size = json_array_get_length(items);
+		dlog_print(DLOG_DEBUG, LOG_TAG, "[get_favorites_n] size:%d", size);
+
+		for (int i = 0; i < size; ++i)
+		{
+			JsonObject* obj = json_array_get_object_element(items, i);
+			favorite_item_s* item = malloc(sizeof(favorite_item_s));
+			item->title = json_object_get_string_member(obj, "title");
+			item->url = json_object_get_string_member(obj, "url");
+			g_ptr_array_add(result, item);
+		}
 	}
 
 	return result;
@@ -96,21 +107,18 @@ get_favorites_n(const char* json)
 static char*
 gl_title_text_get(void *data, Evas_Object *obj, const char *part)
 {
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[gl_title_text_get] %s", part);
 	return strdup("Favorite");
 }
 
 static char*
 gl_add_text_get(void *data, Evas_Object *obj, const char *part)
 {
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[gl_add_text_get] %s", part);
 	return strdup("Add to favorites");
 }
 
 static char*
 gl_text_get(void *data, Evas_Object *obj, const char *part)
 {
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[gl_text_get] %s", part);
 	favorite_item_s* item = data;
 	if (strcmp(part, "elm.text.1"))
 	{
@@ -141,6 +149,7 @@ gl_item_sel(void *data, Evas_Object *obj, void *event_info)
 	favorite_item_s* item = data;
 
 }
+
 Elm_Object_Item*
 open_favorite_layout(Evas_Object* navi, Evas_Object* parent, bundle* result, const char* title, const char* url)
 {
@@ -152,6 +161,7 @@ open_favorite_layout(Evas_Object* navi, Evas_Object* parent, bundle* result, con
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[open_favorite_layout] %s", title);
 
 	Evas_Object* genlist = elm_genlist_add(parent);
+	elm_genlist_mode_set(genlist, ELM_LIST_COMPRESS);
 
 	Elm_Genlist_Item_Class* title_cls = elm_genlist_item_class_new();
 	title_cls->item_style = "title";
@@ -164,6 +174,9 @@ open_favorite_layout(Evas_Object* navi, Evas_Object* parent, bundle* result, con
 	Elm_Genlist_Item_Class* item_cls = elm_genlist_item_class_new();
 	item_cls->item_style = "2text";
 	item_cls->func.text_get = gl_text_get;
+
+	Elm_Genlist_Item_Class* padding_cls = elm_genlist_item_class_new();
+	padding_cls->item_style = "padding";
 
 	elm_genlist_item_append(genlist, title_cls, NULL, NULL, ELM_GENLIST_ITEM_NONE, NULL, ad);
 	elm_genlist_item_append(genlist, add_cls, NULL, NULL, ELM_GENLIST_ITEM_NONE, gl_add_sel, ad);
@@ -178,15 +191,19 @@ open_favorite_layout(Evas_Object* navi, Evas_Object* parent, bundle* result, con
 		elm_genlist_item_append(genlist, item_cls, item, NULL, ELM_GENLIST_ITEM_NONE, gl_item_sel, item);
 	}
 
+	elm_genlist_item_append(genlist, padding_cls, NULL, NULL, ELM_GENLIST_ITEM_NONE, NULL, NULL);
+
 	free((char*) json);
 	g_ptr_array_free(favorites, FALSE);
 
 	elm_genlist_item_class_free(title_cls);
 	elm_genlist_item_class_free(add_cls);
 	elm_genlist_item_class_free(item_cls);
+	elm_genlist_item_class_free(padding_cls);
 	title_cls = NULL;
 	add_cls = NULL;
 	item_cls = NULL;
+	padding_cls = NULL;
 
 	return elm_naviframe_item_simple_push(ad->navi, genlist);
 }

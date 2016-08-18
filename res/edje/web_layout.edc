@@ -208,10 +208,10 @@ collections {
             action: SIGNAL_EMIT "signal.btn.search.clicked" "*";
          }
          program {
-            name: "program.web.btn.favorite.clicked";
-            source: "part.web.btn.favorite";
+            name: "program.web.btn.bookmark.clicked";
+            source: "part.web.btn.bookmark";
             signal: "mouse,clicked,1";
-            action: SIGNAL_EMIT "signal.btn.favorite.clicked" "*";
+            action: SIGNAL_EMIT "signal.btn.bookmark.clicked" "*";
          }
       }
    }

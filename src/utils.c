@@ -1,11 +1,9 @@
 #include <app.h>
-#include <linux/limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "common.h"
+#include <Elementary.h>
+#include "utils.h"
 
 void
-app_get_resource(const char *edj_file_in, char *edj_path_out)
+app_get_resource(const char* edj_file_in, char* edj_path_out)
 {
 	char* res_path = app_get_resource_path();
 	if (res_path) {
@@ -13,4 +11,3 @@ app_get_resource(const char *edj_file_in, char *edj_path_out)
 		free(res_path);
 	}
 }
-

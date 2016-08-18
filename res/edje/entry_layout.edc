@@ -1,0 +1,16 @@
+collections {
+   group {
+      name: "group.entry";
+      parts {
+         part {
+            name: "part.entry";
+            type: SWALLOW;
+            description {
+               state: "default" 0.0;
+               rel1.relative: 0.15 0.15;
+               rel2.relative: 0.85 0.3;
+            }
+         }
+      }
+   }
+}
