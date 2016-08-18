@@ -75,8 +75,8 @@ collections {
             type: RECT;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.15 0.0;
-               rel2.relative: 0.85 0.15;
+               rel1.relative: 0.15 0.85;
+               rel2.relative: 0.5 1.0;
                color_class: "color_transparent";
             }
             description {
@@ -92,8 +92,8 @@ collections {
             description {
                state: "default" 0.0;
                image.normal: "ic_search_white_24dp_2x.png";
-               rel1.relative: 0.425 0.0;
-               rel2.relative: 0.575 0.15;
+               rel1.relative: 0.325 0.85;
+               rel2.relative: 0.475 1.0;
             }
          }
          part {
@@ -101,7 +101,7 @@ collections {
             type: RECT;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.15 0.85;
+               rel1.relative: 0.5 0.85;
                rel2.relative: 0.85 1.0;
                color_class: "color_transparent";
             }
@@ -118,8 +118,8 @@ collections {
             description {
                state: "default" 0.0;
                image.normal: "ic_bookmark_white_24dp_2x.png";
-               rel1.relative: 0.425 0.85;
-               rel2.relative: 0.575 1.0;
+               rel1.relative: 0.525 0.85;
+               rel2.relative: 0.675 1.0;
             }
          }
          part {
