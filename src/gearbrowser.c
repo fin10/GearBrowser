@@ -53,7 +53,6 @@ create_base_gui(AppData *appData) {
 	}
 
 	evas_object_smart_callback_add(appData->win, "delete,request", win_delete_request_cb, NULL);
-	eext_object_event_callback_add(appData->win, EEXT_CALLBACK_BACK, win_back_cb, appData);
 
 	/* Conformant */
 	appData->conform = elm_conformant_add(appData->win);
@@ -67,6 +66,8 @@ create_base_gui(AppData *appData) {
 	elm_object_content_set(appData->conform, appData->navi);
 	Elm_Object_Item *item = web_layout_open(appData->navi);
 	elm_naviframe_item_pop_cb_set(item, web_close_cb, NULL);
+
+	eext_object_event_callback_add(appData->navi, EEXT_CALLBACK_BACK, win_back_cb, appData);
 
 	/* Show window after base gui is set up */
 	evas_object_show(appData->win);

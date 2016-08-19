@@ -1,6 +1,7 @@
 #include <Elementary.h>
 #include <dlog.h>
 #include <bundle.h>
+#include <efl_extension.h>
 #include "gearbrowser.h"
 #include "utils.h"
 #include "bookmark_layout.h"
@@ -33,9 +34,50 @@ bookmark_layout_release(void) {
 	}
 }
 
+static void
+mo_item_clicked(void *data, Evas_Object *obj, void *event_info) {
+	Eext_Object_Item *item = (Eext_Object_Item *)event_info;
+	const char *mainText = eext_more_option_item_part_text_get(item, "selector,main_text");
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[mo_item_clicked] %s", mainText);
+	if (!strcmp(mainText, "Bookmark")) {
+	} else if (!strcmp(mainText, "Delete")) {
+		elm_naviframe_item_pop(gBookmarkData->navi);
+	}
+}
+
+static Evas_Object*
+create_more_option(Evas_Object* layout) {
+	Evas_Object *moreOption = eext_more_option_add(layout);
+	eext_more_option_direction_set(moreOption, EEXT_MORE_OPTION_DIRECTION_TOP);
+	elm_object_part_content_set(layout, "part.bookmark.more", moreOption);
+
+	evas_object_smart_callback_add(moreOption, "item,clicked", mo_item_clicked, NULL);
+
+	Eext_Object_Item *item = eext_more_option_item_append(moreOption);
+	eext_more_option_item_part_text_set(item, "selector,main_text", "Bookmark");
+	eext_more_option_item_part_text_set(item, "selector,sub_text", "this page");
+
+	Evas_Object *img = elm_image_add(moreOption);
+	char add_img_path[PATH_MAX] = {0, };
+	app_get_resource("image/add.png", add_img_path);
+	elm_image_file_set(img, add_img_path, NULL);
+	eext_more_option_item_part_content_set(item, "item,icon", img);
+
+	item = eext_more_option_item_append(moreOption);
+	eext_more_option_item_part_text_set(item, "selector,main_text", "Delete");
+
+	img = elm_image_add(moreOption);
+	char delete_img_path[PATH_MAX] = {0, };
+	app_get_resource("image/delete.png", delete_img_path);
+	elm_image_file_set(img, delete_img_path, NULL);
+	eext_more_option_item_part_content_set(item, "item,icon", img);
+
+	return moreOption;
+}
+
 static char*
 gl_title_text_get(void *data, Evas_Object *obj, const char *part) {
-	return strdup("Favorite");
+	return strdup("Bookmark");
 }
 
 static char*
@@ -57,7 +99,15 @@ gl_item_sel(void *data, Evas_Object *obj, void *event_info) {
 
 static Evas_Object*
 create_genlist(Evas_Object *parent, GPtrArray *items) {
-	Evas_Object *genlist = elm_genlist_add(parent);
+	char edj_path[PATH_MAX] = {0, };
+	app_get_resource("edje/bookmark_layout.edj", edj_path);
+
+	Evas_Object *layout = elm_layout_add(parent);
+	elm_layout_file_set(layout, edj_path, "group.bookmark");
+	gBookmarkData->layout = layout;
+
+	Evas_Object *genlist = elm_genlist_add(layout);
+	elm_object_part_content_set(layout, "part.bookmark.bg", genlist);
 	elm_genlist_mode_set(genlist, ELM_LIST_COMPRESS);
 
 	Elm_Genlist_Item_Class *title_cls = elm_genlist_item_class_new();
@@ -89,7 +139,9 @@ create_genlist(Evas_Object *parent, GPtrArray *items) {
 	item_cls = NULL;
 	padding_cls = NULL;
 
-	return genlist;
+	create_more_option(layout);
+
+	return layout;
 }
 
 static void
@@ -152,6 +204,7 @@ text_click_cb(void *data, Evas_Object *obj, const char *emission, const char *so
 
 static Evas_Object*
 create_add_bookmark_layout(Evas_Object *parent) {
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[create_add_bookmark_layout]");
 	char edj_path[PATH_MAX] = {0, };
 	app_get_resource("edje/add_bookmark_layout.edj", edj_path);
 
