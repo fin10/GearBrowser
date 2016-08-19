@@ -97,7 +97,7 @@ collections {
             }
          }
          part {
-            name: "part.web.btn.favorite";
+            name: "part.web.btn.bookmark";
             type: RECT;
             description {
                state: "default" 0.0;
@@ -112,7 +112,7 @@ collections {
             }
          }
          part {
-            name: "part.web.btn.favorite.icon";
+            name: "part.web.btn.bookmark.icon";
             type: IMAGE;
             mouse_events: 0;
             description {
@@ -176,18 +176,18 @@ collections {
             target: "part.web.btn.search";
          }
          program {
-            name: "program.web.btn.favorite.pressed";
-            source: "part.web.btn.favorite";
+            name: "program.web.btn.bookmark.pressed";
+            source: "part.web.btn.bookmark";
             signal: "mouse,down,1";
             action: STATE_SET "pressed" 0.0;
-            target: "part.web.btn.favorite";
+            target: "part.web.btn.bookmark";
          }
          program {
-            name: "program.web.btn.favorite.released";
-            source: "part.web.btn.favorite";
+            name: "program.web.btn.bookmark.released";
+            source: "part.web.btn.bookmark";
             signal: "mouse,up,1";
             action: STATE_SET "default" 0.0;
-            target: "part.web.btn.favorite";
+            target: "part.web.btn.bookmark";
          }
          program {
             name: "program.web.btn.back.clicked";

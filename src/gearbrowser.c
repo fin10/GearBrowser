@@ -16,10 +16,10 @@ win_delete_request_cb(void *data, Evas_Object *obj, void *event_info) {
 }
 
 static void
-win_back_cb(void* data, Evas_Object* obj, void* event_info) {
+win_back_cb(void *data, Evas_Object *obj, void *event_info) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[win_back_cb]");
-	AppData* ad = data;
-	Eina_List* items = elm_naviframe_items_get(ad->navi);
+	AppData *ad = data;
+	Eina_List *items = elm_naviframe_items_get(ad->navi);
 	if (items != NULL) {
 		dlog_print(DLOG_DEBUG, LOG_TAG, "[win_back_cb] count:%d", items->accounting->count);
 		if (items->accounting->count == 1) {
@@ -31,7 +31,7 @@ win_back_cb(void* data, Evas_Object* obj, void* event_info) {
 }
 
 static Eina_Bool
-web_close_cb(void* data, Elm_Object_Item* it) {
+web_close_cb(void *data, Elm_Object_Item *it) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_close_cb]");
 	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
 	web_layout_release();
@@ -40,7 +40,7 @@ web_close_cb(void* data, Elm_Object_Item* it) {
 }
 
 static void
-create_base_gui(AppData* appData) {
+create_base_gui(AppData *appData) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[create_base_gui]");
 
 	/* Window */
@@ -65,7 +65,7 @@ create_base_gui(AppData* appData) {
 
 	appData->navi = elm_naviframe_add(appData->conform);
 	elm_object_content_set(appData->conform, appData->navi);
-	Elm_Object_Item* item = web_layout_open(appData->navi);
+	Elm_Object_Item *item = web_layout_open(appData->navi);
 	elm_naviframe_item_pop_cb_set(item, web_close_cb, NULL);
 
 	/* Show window after base gui is set up */
@@ -74,7 +74,7 @@ create_base_gui(AppData* appData) {
 
 static bool
 app_create(void *data) {
-	AppData* ad = data;
+	AppData *ad = data;
 	create_base_gui(ad);
 	return true;
 }
@@ -131,7 +131,7 @@ ui_app_low_memory(app_event_info_h event_info, void *user_data) {
 
 int
 main(int argc, char *argv[]) {
-	AppData* ad = {0,};
+	AppData *ad = {0,};
 	int ret = 0;
 
 	ui_app_lifecycle_callback_s event_callback = {0,};
