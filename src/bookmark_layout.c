@@ -7,12 +7,15 @@
 #include "bookmark_layout.h"
 #include "bookmark_model.h"
 #include "entry_layout.h"
+#include "add_bookmark_layout.h"
 
 typedef struct bookmark_data {
 	Evas_Object *navi;
 	Evas_Object *layout;
 	Evas_Object *genlist;
+	Evas_Object *emptyLayout;
 	Eext_Circle_Surface *surface;
+	Evas_Object *moreOption;
 	bundle *result;
 	GPtrArray *items;
 	char *title;
@@ -20,6 +23,8 @@ typedef struct bookmark_data {
 } BookmarkData;
 
 BookmarkData *gBookmarkData = NULL;
+
+static void genlist_refresh(void);
 
 void
 bookmark_layout_release(void) {
@@ -43,7 +48,9 @@ delete_popup_ok_cb(void *data, Evas_Object *obj, void *event_info) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[delete_popup_ok_cb] index:%d", index);
 	BookmarkModel *model = g_ptr_array_index(gBookmarkData->items, index - 2);
 	bookmark_model_remove(model);
-	elm_naviframe_item_pop(gBookmarkData->navi);
+	elm_popup_dismiss(data);
+	eext_more_option_opened_set(gBookmarkData->moreOption, EINA_FALSE);
+	genlist_refresh();
 }
 
 static void
@@ -87,7 +94,6 @@ delete_popup_open(void) {
 	elm_image_file_set(icon, img_path, NULL);
 	evas_object_size_hint_weight_set(icon, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	elm_object_part_content_set(btn, "elm.swallow.content", icon);
-	evas_object_show(icon);
 
 	btn = elm_button_add(popup);
 	elm_object_style_set(btn, "popup/circle/right");
@@ -100,9 +106,21 @@ delete_popup_open(void) {
 	elm_image_file_set(icon, img_path, NULL);
 	evas_object_size_hint_weight_set(icon, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	elm_object_part_content_set(btn, "elm.swallow.content", icon);
-	evas_object_show(icon);
 
 	evas_object_show(popup);
+}
+
+static Eina_Bool
+add_bookmark_result_cb(void *data, Elm_Object_Item *it) {
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[add_bookmark_result_cb]");
+	bundle *result = data;
+	bundle_free(result);
+	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
+	add_bookmark_layout_release();
+	eext_more_option_opened_set(gBookmarkData->moreOption, EINA_FALSE);
+	genlist_refresh();
+
+	return EINA_TRUE;
 }
 
 static void
@@ -111,23 +129,24 @@ mo_item_clicked(void *data, Evas_Object *obj, void *event_info) {
 	const char *mainText = eext_more_option_item_part_text_get(item, "selector,main_text");
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[mo_item_clicked] %s", mainText);
 	if (!strcmp(mainText, "Bookmark")) {
-		bundle_add_str(gBookmarkData->result, "action", "add_bookmark");
-		elm_naviframe_item_pop(gBookmarkData->navi);
+		bundle *result = bundle_create();
+		bundle_add_str(result, "title", gBookmarkData->title);
+		bundle_add_str(result, "url", gBookmarkData->url);
+		Elm_Object_Item *item = add_bookmark_layout_open(gBookmarkData->navi, result);
+		elm_naviframe_item_pop_cb_set(item, add_bookmark_result_cb, result);
 	} else if (!strcmp(mainText, "Delete")) {
 		delete_popup_open();
 	}
 }
 
 static Evas_Object*
-create_more_option(Evas_Object* layout) {
-	Evas_Object *moreOption = eext_more_option_add(layout);
-	elm_object_part_content_set(layout, "part.bookmark.more", moreOption);
-
+create_more_option(Evas_Object* parent) {
+	Evas_Object *moreOption = eext_more_option_add(parent);
 	evas_object_smart_callback_add(moreOption, "item,clicked", mo_item_clicked, NULL);
 
 	Eext_Object_Item *item = eext_more_option_item_append(moreOption);
 	eext_more_option_item_part_text_set(item, "selector,main_text", "Bookmark");
-	eext_more_option_item_part_text_set(item, "selector,sub_text", "this page");
+	eext_more_option_item_part_text_set(item, "selector,sub_text", "Add this page");
 
 	Evas_Object *img = elm_image_add(moreOption);
 	char add_img_path[PATH_MAX] = {0, };
@@ -169,57 +188,91 @@ gl_item_sel(void *data, Evas_Object *obj, void *event_info) {
 }
 
 static Evas_Object*
-create_genlist(Evas_Object *parent, GPtrArray *items) {
-	char edj_path[PATH_MAX] = {0, };
-	app_get_resource("edje/bookmark_layout.edj", edj_path);
-
-	Evas_Object *layout = elm_layout_add(parent);
-	elm_layout_file_set(layout, edj_path, "group.bookmark");
-	gBookmarkData->layout = layout;
-
-	Evas_Object *genlist = elm_genlist_add(layout);
-	elm_object_part_content_set(layout, "part.bookmark.bg", genlist);
+create_genlist(Evas_Object *parent, Eext_Circle_Surface *surface) {
+	Evas_Object *genlist = elm_genlist_add(parent);
 	elm_genlist_mode_set(genlist, ELM_LIST_COMPRESS);
-	gBookmarkData->genlist = genlist;
 
-	Eext_Circle_Surface *surface = eext_circle_surface_naviframe_add(parent);
 	Evas_Object *circleGenlist = eext_circle_object_genlist_add(genlist, surface);
 	eext_circle_object_genlist_scroller_policy_set(circleGenlist, ELM_SCROLLER_POLICY_OFF, ELM_SCROLLER_POLICY_AUTO);
 	eext_rotary_object_event_activated_set(circleGenlist, EINA_TRUE);
-	gBookmarkData->surface = surface;
 
-	Elm_Genlist_Item_Class *title_cls = elm_genlist_item_class_new();
-	title_cls->item_style = "title";
-	title_cls->func.text_get = gl_title_text_get;
+	return genlist;
+}
 
-	Elm_Genlist_Item_Class *item_cls = elm_genlist_item_class_new();
-	item_cls->item_style = "2text";
-	item_cls->func.text_get = gl_text_get;
+static void
+empty_clicked_cb(void *data, Evas_Object *obj, void *event_info) {
+	bundle *result = bundle_create();
+	bundle_add_str(result, "title", gBookmarkData->title);
+	bundle_add_str(result, "url", gBookmarkData->url);
+	Elm_Object_Item *item = add_bookmark_layout_open(gBookmarkData->navi, result);
+	elm_naviframe_item_pop_cb_set(item, add_bookmark_result_cb, result);
+}
 
-	Elm_Genlist_Item_Class *padding_cls = elm_genlist_item_class_new();
-	padding_cls->item_style = "padding";
+static Evas_Object *
+create_empty_layout(Evas_Object *parent) {
+	Evas_Object *layout = elm_layout_add(parent);
+	elm_layout_theme_set(layout, "layout", "nocontents", "default");
 
-	elm_genlist_item_append(genlist, title_cls, NULL, NULL, ELM_GENLIST_ITEM_NONE, NULL, NULL);
+	char img_path[PATH_MAX] = {0, };
+	app_get_resource("image/ic_bookmark_white_48dp.png", img_path);
 
-	guint size = items->len;
-	for (int i = 0; i < size; ++i)
-	{
-		BookmarkModel *item = g_ptr_array_index(items, i);
-		elm_genlist_item_append(genlist, item_cls, item, NULL, ELM_GENLIST_ITEM_NONE, gl_item_sel, item);
-	}
-
-	elm_genlist_item_append(genlist, padding_cls, NULL, NULL, ELM_GENLIST_ITEM_NONE, NULL, NULL);
-
-	elm_genlist_item_class_free(title_cls);
-	elm_genlist_item_class_free(item_cls);
-	elm_genlist_item_class_free(padding_cls);
-	title_cls = NULL;
-	item_cls = NULL;
-	padding_cls = NULL;
-
-	create_more_option(layout);
+	Evas_Object *img = elm_image_add(parent);
+	elm_image_file_set(img, img_path, NULL);
+	elm_object_part_content_set(layout, "elm.swallow.icon", img);
+	elm_object_part_text_set(layout, "elm.text.title", "Bookmark");
+	elm_object_part_text_set(layout, "elm.text", "Add this page");
+	evas_object_smart_callback_add(img, "clicked", empty_clicked_cb, NULL);
 
 	return layout;
+}
+
+static void
+genlist_refresh(void) {
+	Evas_Object *genlist = gBookmarkData->genlist;
+	elm_genlist_clear(genlist);
+	if (gBookmarkData->items != NULL) {
+		g_ptr_array_free(gBookmarkData->items, TRUE);
+	}
+
+	GPtrArray *items = bookmark_model_get_list_n();
+	gBookmarkData->items = items;
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[genlist_refresh] items:%d", items->len);
+
+	if (items->len == 0) {
+		elm_layout_signal_emit(gBookmarkData->layout, "signal,empty,show", "mycode");
+		elm_layout_signal_emit(gBookmarkData->layout, "signal,more,hide", "mycode");
+	} else {
+		elm_layout_signal_emit(gBookmarkData->layout, "signal,empty,hide", "mycode");
+		elm_layout_signal_emit(gBookmarkData->layout, "signal,more,show", "mycode");
+
+		Elm_Genlist_Item_Class *title_cls = elm_genlist_item_class_new();
+		title_cls->item_style = "title";
+		title_cls->func.text_get = gl_title_text_get;
+
+		Elm_Genlist_Item_Class *item_cls = elm_genlist_item_class_new();
+		item_cls->item_style = "2text";
+		item_cls->func.text_get = gl_text_get;
+
+		Elm_Genlist_Item_Class *padding_cls = elm_genlist_item_class_new();
+		padding_cls->item_style = "padding";
+
+		elm_genlist_item_append(genlist, title_cls, NULL, NULL, ELM_GENLIST_ITEM_NONE, NULL, NULL);
+
+		guint size = items->len;
+		for (int i = 0; i < size; ++i) {
+			BookmarkModel *item = g_ptr_array_index(items, i);
+			elm_genlist_item_append(genlist, item_cls, item, NULL, ELM_GENLIST_ITEM_NONE, gl_item_sel, item);
+		}
+
+		elm_genlist_item_append(genlist, padding_cls, NULL, NULL, ELM_GENLIST_ITEM_NONE, NULL, NULL);
+
+		elm_genlist_item_class_free(title_cls);
+		elm_genlist_item_class_free(item_cls);
+		elm_genlist_item_class_free(padding_cls);
+		title_cls = NULL;
+		item_cls = NULL;
+		padding_cls = NULL;
+	}
 }
 
 Elm_Object_Item*
@@ -229,22 +282,37 @@ bookmark_layout_open(Evas_Object *navi, bundle *result) {
 		return NULL;
 	}
 
-	GPtrArray *items = bookmark_model_get_list_n();
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_layout_open] size:%d", items->len);
-	if (items->len == 0) {
-		g_ptr_array_free(items, TRUE);
-		bundle_add_str(result, "action", "add_bookmark");
-		return NULL;
-	} else {
-		gBookmarkData = malloc(sizeof(BookmarkData));
-		gBookmarkData->navi = navi;
-		gBookmarkData->result = result;
-		gBookmarkData->items = items;
-		bundle_get_str(result, "title", &gBookmarkData->title);
-		bundle_get_str(result, "url", &gBookmarkData->url);
-		dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_layout_open] %s, %s", gBookmarkData->title, gBookmarkData->url);
+	gBookmarkData = malloc(sizeof(BookmarkData));
+	gBookmarkData->navi = navi;
+	gBookmarkData->result = result;
+	bundle_get_str(result, "title", &gBookmarkData->title);
+	bundle_get_str(result, "url", &gBookmarkData->url);
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_layout_open] %s, %s", gBookmarkData->title, gBookmarkData->url);
 
-		Evas_Object *content = create_genlist(navi, items);
-		return elm_naviframe_item_simple_push(navi, content);
-	}
+	char edj_path[PATH_MAX] = {0, };
+	app_get_resource("edje/bookmark_layout.edj", edj_path);
+
+	Evas_Object *layout = elm_layout_add(navi);
+	elm_layout_file_set(layout, edj_path, "group.bookmark");
+	gBookmarkData->layout = layout;
+
+	Evas_Object *emptyLayout = create_empty_layout(layout);
+	elm_object_part_content_set(layout, "part.bookmark.empty", emptyLayout);
+	gBookmarkData->emptyLayout = emptyLayout;
+
+	Eext_Circle_Surface *surface = eext_circle_surface_naviframe_add(layout);
+	gBookmarkData->surface = surface;
+
+	Evas_Object *genlist = create_genlist(layout, surface);
+	elm_object_part_content_set(layout, "part.bookmark.genlist", genlist);
+	gBookmarkData->genlist = genlist;
+
+	Evas_Object *moreOption = create_more_option(layout);
+	gBookmarkData->moreOption = moreOption;
+	elm_object_part_content_set(layout, "part.bookmark.more", moreOption);
+
+	gBookmarkData->items = NULL;
+	genlist_refresh();
+
+	return elm_naviframe_item_simple_push(navi, layout);
 }

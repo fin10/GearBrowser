@@ -6,7 +6,6 @@
 #include "utils.h"
 #include "search_layout.h"
 #include "bookmark_layout.h"
-#include "add_bookmark_layout.h"
 #include "web_layout.h"
 
 static const char *SIGNAL_BACK_BUTTON_CLICKED = "signal.btn.back.clicked";
@@ -28,17 +27,6 @@ web_layout_release(void) {
 		free(gWebData);
 		gWebData = NULL;
 	}
-}
-
-static Eina_Bool
-add_bookmark_result_cb(void *data, Elm_Object_Item *it) {
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[add_bookmark_result_cb]");
-	bundle *result = data;
-	bundle_free(result);
-	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
-	add_bookmark_layout_release();
-
-	return EINA_TRUE;
 }
 
 static Eina_Bool
@@ -70,14 +58,6 @@ bookmark_result_cb(void *data, Elm_Object_Item *it) {
 		ewk_view_url_set(gWebData->web, query);
 	}
 
-	if (action != NULL && !strcmp(action, "add_bookmark")) {
-		bundle *result = bundle_create();
-		bundle_add_str(result, "title", ewk_view_title_get(gWebData->web));
-		bundle_add_str(result, "url", ewk_view_url_get(gWebData->web));
-		Elm_Object_Item *item = add_bookmark_layout_open(gWebData->navi, result);
-		elm_naviframe_item_pop_cb_set(item, add_bookmark_result_cb, result);
-	}
-
 	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
 	bundle_free(result);
 	bookmark_layout_release();
@@ -101,16 +81,7 @@ web_button_click_cb(void *data, Evas_Object *obj, const char *emission, const ch
 		bundle_add_str(result, "title", ewk_view_title_get(gWebData->web));
 		bundle_add_str(result, "url", ewk_view_url_get(gWebData->web));
 		Elm_Object_Item *item = bookmark_layout_open(gWebData->navi, result);
-		if (item != NULL) {
-			elm_naviframe_item_pop_cb_set(item, bookmark_result_cb, result);
-		} else {
-			char *action = NULL;
-			bundle_get_str(result, "action", &action);
-			if (action != NULL && !strcmp(action, "add_bookmark")) {
-				item = add_bookmark_layout_open(gWebData->navi, result);
-				elm_naviframe_item_pop_cb_set(item, add_bookmark_result_cb, result);
-			}
-		}
+		elm_naviframe_item_pop_cb_set(item, bookmark_result_cb, result);
 	}
 }
 

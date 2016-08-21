@@ -3,7 +3,7 @@ collections {
       name: "group.bookmark";
       parts {
          part {
-            name: "part.bookmark.bg";
+            name: "part.bookmark.genlist";
             type: SWALLOW;
             description {
                state: "default" 0.0;
@@ -12,10 +12,25 @@ collections {
             }
          }
          part {
+            name: "part.bookmark.empty";
+            type: SWALLOW;
+            description {
+               state: "default" 0.0;
+               rel1.relative: 0.0 0.0;
+               rel2.relative: 1.0 1.0;
+               visible: 1;
+            }
+            description {
+               state: "invisible" 0.0;
+               inherit: "default" 0.0;
+               visible: 0;
+            }
+         }
+         part {
             name: "part.bookmark.block";
             type: RECT;
             mouse_events: 1;
-            description { 
+            description {
                state: "default" 0.0;
                rel1.relative: 0.9 0.4;
                rel2.relative: 1.0 0.6;
@@ -28,15 +43,45 @@ collections {
             mouse_events: 1;
             description {
                state: "default" 0.0;
-               rel1 {
-                  relative: 0.0 0.0;
-                  to: "part.bookmark.bg";
-               }
-               rel2 {
-                  relative: 1.0 1.0;
-                  to: "part.bookmark.bg";
-               }
+               rel1.relative: 0.0 0.0;
+               rel2.relative: 1.0 1.0;
+               visible: 1;
             }
+            description {
+               state: "invisible" 0.0;
+               inherit: "default" 0.0;
+               visible: 0;
+            }
+         }
+      }
+      programs {
+         program {
+            name: "program.bookmark.empty.show";
+            signal: "signal,empty,show";
+            source: "mycode";
+            action: STATE_SET "default" 0.0;
+            target: "part.bookmark.empty";
+         }
+         program {
+            name: "program.bookmark.empty.hide";
+            signal: "signal,empty,hide";
+            source: "mycode";
+            action: STATE_SET "invisible" 0.0;
+            target: "part.bookmark.empty";
+         }
+         program {
+            name: "program.bookmark.more_option.show";
+            signal: "signal,more,show";
+            source: "mycode";
+            action: STATE_SET "default" 0.0;
+            target: "part.bookmark.more";
+         }
+         program {
+            name: "program.bookmark.more_option.hide";
+            signal: "signal,more,hide";
+            source: "mycode";
+            action: STATE_SET "invisible" 0.0;
+            target: "part.bookmark.more";
          }
       }
    }
