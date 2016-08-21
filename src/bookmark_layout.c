@@ -33,6 +33,79 @@ bookmark_layout_release(void) {
 }
 
 static void
+delete_popup_ok_cb(void *data, Evas_Object *obj, void *event_info) {
+	Evas_Coord x, y, w, h;
+	evas_object_geometry_get(gBookmarkData->genlist, &x, &y, &w, &h);
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[delete_popup_ok_cb] x:%d, y:%d, w:%d, h:%d", x, y, w, h);
+	int posRet = 0;
+	Elm_Object_Item *it = elm_genlist_at_xy_item_get(gBookmarkData->genlist, w/2, h/2, &posRet);
+	int index = elm_genlist_item_index_get(it);
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[delete_popup_ok_cb] index:%d", index);
+	BookmarkModel *model = g_ptr_array_index(gBookmarkData->items, index - 2);
+	bookmark_model_remove(model);
+	elm_naviframe_item_pop(gBookmarkData->navi);
+}
+
+static void
+delete_popup_hide_cb(void *data, Evas_Object *obj, void *event_info) {
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[delete_popup_hide_cb]");
+	Evas_Object *popup = data;
+	elm_popup_dismiss(popup);
+}
+
+static void
+delete_popup_hide_finished_cb(void *data, Evas_Object *obj, void *event_info) {
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[delete_popup_hide_finished_cb]");
+	Evas_Object *popup = data;
+	eext_object_event_callback_del(popup, EEXT_CALLBACK_BACK, delete_popup_hide_cb);
+	eext_object_event_callback_del(popup, EEXT_CALLBACK_BACK, delete_popup_hide_finished_cb);
+	evas_object_del(popup);
+}
+
+static void
+delete_popup_open(void) {
+	Evas_Object *popup = elm_popup_add(gBookmarkData->layout);
+	elm_object_style_set(popup, "circle");
+	evas_object_size_hint_weight_set(popup, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	eext_object_event_callback_add(popup, EEXT_CALLBACK_BACK, delete_popup_hide_cb, popup);
+	evas_object_smart_callback_add(popup, "dismissed", delete_popup_hide_finished_cb, popup);
+
+	Evas_Object *layout = elm_layout_add(popup);
+	elm_layout_theme_set(layout, "layout", "popup", "content/circle/buttons2");
+	elm_object_part_text_set(layout, "elm.text", "Delete?");
+	elm_object_content_set(popup, layout);
+
+	Evas_Object *btn = elm_button_add(popup);
+	elm_object_style_set(btn, "popup/circle/left");
+	evas_object_size_hint_weight_set(btn, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	elm_object_part_content_set(popup, "button1", btn);
+	evas_object_smart_callback_add(btn, "clicked", delete_popup_hide_cb, popup);
+
+	char img_path[PATH_MAX] = {0, };
+	app_get_resource("image/tw_ic_popup_btn_delete.png", img_path);
+	Evas_Object *icon = elm_image_add(btn);
+	elm_image_file_set(icon, img_path, NULL);
+	evas_object_size_hint_weight_set(icon, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	elm_object_part_content_set(btn, "elm.swallow.content", icon);
+	evas_object_show(icon);
+
+	btn = elm_button_add(popup);
+	elm_object_style_set(btn, "popup/circle/right");
+	evas_object_size_hint_weight_set(btn, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	elm_object_part_content_set(popup, "button2", btn);
+	evas_object_smart_callback_add(btn, "clicked", delete_popup_ok_cb, popup);
+
+	app_get_resource("image/tw_ic_popup_btn_check.png", img_path);
+	icon = elm_image_add(btn);
+	elm_image_file_set(icon, img_path, NULL);
+	evas_object_size_hint_weight_set(icon, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
+	elm_object_part_content_set(btn, "elm.swallow.content", icon);
+	evas_object_show(icon);
+
+	evas_object_show(popup);
+}
+
+static void
 mo_item_clicked(void *data, Evas_Object *obj, void *event_info) {
 	Eext_Object_Item *item = (Eext_Object_Item *)event_info;
 	const char *mainText = eext_more_option_item_part_text_get(item, "selector,main_text");
@@ -41,18 +114,7 @@ mo_item_clicked(void *data, Evas_Object *obj, void *event_info) {
 		bundle_add_str(gBookmarkData->result, "action", "add_bookmark");
 		elm_naviframe_item_pop(gBookmarkData->navi);
 	} else if (!strcmp(mainText, "Delete")) {
-		Evas_Coord x, y, w, h;
-		evas_object_geometry_get(gBookmarkData->genlist, &x, &y, &w, &h);
-		dlog_print(DLOG_DEBUG, LOG_TAG, "[mo_item_clicked] x:%d, y:%d, w:%d, h:%d", x, y, w, h);
-		int posRet = 0;
-		Elm_Object_Item *it = elm_genlist_at_xy_item_get(gBookmarkData->genlist, w/2, h/2, &posRet);
-		int index = elm_genlist_item_index_get(it);
-		dlog_print(DLOG_DEBUG, LOG_TAG, "[mo_item_clicked] index:%d", index);
-		BookmarkModel *model = g_ptr_array_index(gBookmarkData->items, index - 2);
-		if (model != NULL) {
-			bookmark_model_remove(model);
-			elm_naviframe_item_pop(gBookmarkData->navi);
-		}
+		delete_popup_open();
 	}
 }
 
