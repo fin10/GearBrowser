@@ -1,6 +1,5 @@
 #include <dlog.h>
-#include <eina_types.h>
-#include <stdlib.h>
+#include <json-glib.h>
 #include "gearbrowser.h"
 #include "bookmark_model.h"
 #include "settings.h"
@@ -9,10 +8,12 @@ Eina_Bool
 bookmark_model_add(const char *title, const char *url) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_model_add] %s, %s", title, url);
 
+	int ret = -1;
 	GError *error = NULL;
+	g_type_init();
 	JsonParser *parser = json_parser_new();
 	const char *json = settings_value_get_n(PREF_KEY_BOOKMARKS);
-	json_parser_load_from_data(parser, json, strlen(json), &error);
+	json_parser_load_from_data(parser, json, -1, &error);
 	if (error) {
 		dlog_print(DLOG_ERROR, LOG_TAG, "[bookmark_model_add] %s", error);
 		g_error_free(error);
@@ -29,9 +30,7 @@ bookmark_model_add(const char *title, const char *url) {
 		json_generator_set_root(generator, root);
 		gchar *result = json_generator_to_data(generator, NULL);
 		dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_model_add] json:%s", result);
-		int ret = settings_value_set(PREF_KEY_BOOKMARKS, result);
-		if (ret == 0) return EINA_TRUE;
-		else dlog_print(DLOG_ERROR, LOG_TAG, "[bookmark_model_add] error_code:%d", ret);
+		ret = settings_value_set(PREF_KEY_BOOKMARKS, result);
 
 		json_node_free(root);
 		g_object_unref(generator);
@@ -43,17 +42,24 @@ bookmark_model_add(const char *title, const char *url) {
 	json = NULL;
 	parser = NULL;
 
-	return EINA_FALSE;
+	if (ret == 0) {
+		return EINA_TRUE;
+	} else {
+		dlog_print(DLOG_ERROR, LOG_TAG, "[bookmark_model_add] error_code:%d", ret);
+		return EINA_FALSE;
+	}
 }
 
 Eina_Bool
 bookmark_model_remove(BookmarkModel *item) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_model_remove] %s, %s", item->title, item->url);
 
+	int ret = -1;
 	GError *error = NULL;
+	g_type_init();
 	JsonParser *parser = json_parser_new();
 	const char *json = settings_value_get_n(PREF_KEY_BOOKMARKS);
-	json_parser_load_from_data(parser, json, strlen(json), &error);
+	json_parser_load_from_data(parser, json, -1, &error);
 	if (error) {
 		dlog_print(DLOG_ERROR, LOG_TAG, "[bookmark_model_remove] %s", error);
 		g_error_free(error);
@@ -75,9 +81,7 @@ bookmark_model_remove(BookmarkModel *item) {
 		json_generator_set_root(generator, root);
 		gchar *result = json_generator_to_data(generator, NULL);
 		dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_model_remove] json:%s", result);
-		int ret = settings_value_set(PREF_KEY_BOOKMARKS, result);
-		if (ret == 0) return EINA_TRUE;
-		else dlog_print(DLOG_ERROR, LOG_TAG, "[bookmark_model_remove] error_code:%d", ret);
+		ret = settings_value_set(PREF_KEY_BOOKMARKS, result);
 
 		json_node_free(root);
 		g_object_unref(generator);
@@ -89,18 +93,24 @@ bookmark_model_remove(BookmarkModel *item) {
 	json = NULL;
 	parser = NULL;
 
-	return EINA_FALSE;
+	if (ret == 0) {
+		return EINA_TRUE;
+	} else {
+		dlog_print(DLOG_ERROR, LOG_TAG, "[bookmark_model_remove] error_code:%d", ret);
+		return EINA_FALSE;
+	}
 }
 
-GPtrArray*
+Eina_Array *
 bookmark_model_get_list_n(void) {
 	const char *json = settings_value_get_n(PREF_KEY_BOOKMARKS);
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_model_get_list_n] %s", json);
 
-	GPtrArray *items = g_ptr_array_new();
+	g_type_init();
+	Eina_Array *items = eina_array_new(5);
 	GError *error = NULL;
 	JsonParser *parser = json_parser_new();
-	json_parser_load_from_data(parser, json, strlen(json), &error);
+	json_parser_load_from_data(parser, json, -1, &error);
 	if (error) {
 		dlog_print(DLOG_ERROR, LOG_TAG, "[bookmark_model_get_list_n] %s", error);
 		g_error_free(error);
@@ -114,11 +124,12 @@ bookmark_model_get_list_n(void) {
 			BookmarkModel *item = (BookmarkModel *)malloc(sizeof(BookmarkModel));
 			item->title = strdup(json_object_get_string_member(obj, "title"));
 			item->url = strdup(json_object_get_string_member(obj, "url"));
-			g_ptr_array_add(items, item);
+			eina_array_push(items, item);
 			dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_model_get_list_n] %d, %s, %s", i, item->title, item->url);
 		}
 
 		json_node_free(root);
+		root = NULL;
 	}
 
 	free((void *)json);

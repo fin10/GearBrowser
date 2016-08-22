@@ -13,11 +13,10 @@ typedef struct bookmark_data {
 	Evas_Object *navi;
 	Evas_Object *layout;
 	Evas_Object *genlist;
-	Evas_Object *emptyLayout;
 	Eext_Circle_Surface *surface;
 	Evas_Object *moreOption;
 	bundle *result;
-	GPtrArray *items;
+	Eina_Array *items;
 	char *title;
 	char *url;
 } BookmarkData;
@@ -31,7 +30,9 @@ bookmark_layout_release(void) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_layout_release]");
 	if (gBookmarkData != NULL) {
 		eext_circle_surface_del(gBookmarkData->surface);
-		g_ptr_array_free(gBookmarkData->items, TRUE);
+		gBookmarkData->surface = NULL;
+		eina_array_free(gBookmarkData->items);
+		gBookmarkData->items = NULL;
 		free(gBookmarkData);
 		gBookmarkData = NULL;
 	}
@@ -45,7 +46,7 @@ get_current_model() {
 	Elm_Object_Item *it = elm_genlist_at_xy_item_get(gBookmarkData->genlist, w/2 - x, h/2 - y, &posRet);
 	int index = elm_genlist_item_index_get(it);
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[get_current_model] index:%d", index);
-	return g_ptr_array_index(gBookmarkData->items, index - 2);
+	return eina_array_data_get(gBookmarkData->items, index - 2);
 }
 
 static void
@@ -234,14 +235,15 @@ genlist_refresh(void) {
 	Evas_Object *genlist = gBookmarkData->genlist;
 	elm_genlist_clear(genlist);
 	if (gBookmarkData->items != NULL) {
-		g_ptr_array_free(gBookmarkData->items, TRUE);
+		eina_array_free(gBookmarkData->items);
+		gBookmarkData->items = NULL;
 	}
 
-	GPtrArray *items = bookmark_model_get_list_n();
-	gBookmarkData->items = items;
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[genlist_refresh] items:%d", items->len);
+	gBookmarkData->items = bookmark_model_get_list_n();
+	unsigned int size = eina_array_count_get(gBookmarkData->items);
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[genlist_refresh] items:%d", size);
 
-	if (items->len == 0) {
+	if (size == 0) {
 		elm_layout_signal_emit(gBookmarkData->layout, "signal,empty,show", "mycode");
 		elm_layout_signal_emit(gBookmarkData->layout, "signal,more,hide", "mycode");
 	} else {
@@ -261,9 +263,8 @@ genlist_refresh(void) {
 
 		elm_genlist_item_append(genlist, title_cls, NULL, NULL, ELM_GENLIST_ITEM_NONE, NULL, NULL);
 
-		guint size = items->len;
 		for (int i = 0; i < size; ++i) {
-			BookmarkModel *item = g_ptr_array_index(items, i);
+			BookmarkModel *item = eina_array_data_get(gBookmarkData->items, i);
 			elm_genlist_item_append(genlist, item_cls, item, NULL, ELM_GENLIST_ITEM_NONE, gl_item_sel, item);
 		}
 
@@ -301,9 +302,8 @@ bookmark_layout_open(Evas_Object *navi, bundle *result) {
 
 	Evas_Object *emptyLayout = create_empty_layout(layout);
 	elm_object_part_content_set(layout, "part.bookmark.empty", emptyLayout);
-	gBookmarkData->emptyLayout = emptyLayout;
 
-	Eext_Circle_Surface *surface = eext_circle_surface_naviframe_add(layout);
+	Eext_Circle_Surface *surface = eext_circle_surface_naviframe_add(navi);
 	gBookmarkData->surface = surface;
 
 	Evas_Object *genlist = create_genlist(layout, surface);
@@ -311,8 +311,8 @@ bookmark_layout_open(Evas_Object *navi, bundle *result) {
 	gBookmarkData->genlist = genlist;
 
 	Evas_Object *moreOption = create_more_option(layout);
-	gBookmarkData->moreOption = moreOption;
 	elm_object_part_content_set(layout, "part.bookmark.more", moreOption);
+	gBookmarkData->moreOption = moreOption;
 
 	gBookmarkData->items = NULL;
 	genlist_refresh();
