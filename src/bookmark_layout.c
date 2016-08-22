@@ -37,17 +37,20 @@ bookmark_layout_release(void) {
 	}
 }
 
-static void
-delete_popup_ok_cb(void *data, Evas_Object *obj, void *event_info) {
+static BookmarkModel *
+get_current_model() {
 	Evas_Coord x, y, w, h;
 	evas_object_geometry_get(gBookmarkData->genlist, &x, &y, &w, &h);
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[delete_popup_ok_cb] x:%d, y:%d, w:%d, h:%d", x, y, w, h);
 	int posRet = 0;
-	Elm_Object_Item *it = elm_genlist_at_xy_item_get(gBookmarkData->genlist, w/2, h/2, &posRet);
+	Elm_Object_Item *it = elm_genlist_at_xy_item_get(gBookmarkData->genlist, w/2 - x, h/2 - y, &posRet);
 	int index = elm_genlist_item_index_get(it);
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[delete_popup_ok_cb] index:%d", index);
-	BookmarkModel *model = g_ptr_array_index(gBookmarkData->items, index - 2);
-	bookmark_model_remove(model);
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[get_current_model] index:%d", index);
+	return g_ptr_array_index(gBookmarkData->items, index - 2);
+}
+
+static void
+delete_popup_ok_cb(void *data, Evas_Object *obj, void *event_info) {
+	bookmark_model_remove(get_current_model());
 	elm_popup_dismiss(data);
 	eext_more_option_opened_set(gBookmarkData->moreOption, EINA_FALSE);
 	genlist_refresh();
@@ -70,7 +73,7 @@ delete_popup_hide_finished_cb(void *data, Evas_Object *obj, void *event_info) {
 }
 
 static void
-delete_popup_open(void) {
+delete_popup_open(BookmarkModel *model) {
 	Evas_Object *popup = elm_popup_add(gBookmarkData->layout);
 	elm_object_style_set(popup, "circle");
 	evas_object_size_hint_weight_set(popup, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
@@ -79,7 +82,8 @@ delete_popup_open(void) {
 
 	Evas_Object *layout = elm_layout_add(popup);
 	elm_layout_theme_set(layout, "layout", "popup", "content/circle/buttons2");
-	elm_object_part_text_set(layout, "elm.text", "Delete?");
+	elm_object_part_text_set(layout, "elm.text.title", model->title);
+	elm_object_part_text_set(layout, "elm.text", "Delete this page?");
 	elm_object_content_set(popup, layout);
 
 	Evas_Object *btn = elm_button_add(popup);
@@ -128,14 +132,14 @@ mo_item_clicked(void *data, Evas_Object *obj, void *event_info) {
 	Eext_Object_Item *item = (Eext_Object_Item *)event_info;
 	const char *mainText = eext_more_option_item_part_text_get(item, "selector,main_text");
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[mo_item_clicked] %s", mainText);
-	if (!strcmp(mainText, "Bookmark")) {
+	if (!strcmp(mainText, "Add")) {
 		bundle *result = bundle_create();
 		bundle_add_str(result, "title", gBookmarkData->title);
 		bundle_add_str(result, "url", gBookmarkData->url);
 		Elm_Object_Item *item = add_bookmark_layout_open(gBookmarkData->navi, result);
 		elm_naviframe_item_pop_cb_set(item, add_bookmark_result_cb, result);
 	} else if (!strcmp(mainText, "Delete")) {
-		delete_popup_open();
+		delete_popup_open(get_current_model());
 	}
 }
 
@@ -145,8 +149,7 @@ create_more_option(Evas_Object* parent) {
 	evas_object_smart_callback_add(moreOption, "item,clicked", mo_item_clicked, NULL);
 
 	Eext_Object_Item *item = eext_more_option_item_append(moreOption);
-	eext_more_option_item_part_text_set(item, "selector,main_text", "Bookmark");
-	eext_more_option_item_part_text_set(item, "selector,sub_text", "Add this page");
+	eext_more_option_item_part_text_set(item, "selector,main_text", "Add");
 
 	Evas_Object *img = elm_image_add(moreOption);
 	char add_img_path[PATH_MAX] = {0, };

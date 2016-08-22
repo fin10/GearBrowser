@@ -41,8 +41,9 @@ collections {
             description {
                state: "default" 0.0;
                image.normal: "ic_arrow_back_white_24dp_2x.png";
-               rel1.relative: 0.0 0.425;
-               rel2.relative: 0.15 0.575;
+               rel1.to: "part.web.btn.back";
+               rel2.to: "part.web.btn.back";
+               max: 35 35;
             }
          }
          part {
@@ -67,8 +68,9 @@ collections {
             description {
                state: "default" 0.0;
                image.normal: "ic_arrow_forward_white_24dp_2x.png";
-               rel1.relative: 0.85 0.425;
-               rel2.relative: 1.0 0.575;
+               rel1.to: "part.web.btn.forward";
+               rel2.to: "part.web.btn.forward";
+               max: 35 35;
             }
          }
          part {
@@ -93,8 +95,10 @@ collections {
             description {
                state: "default" 0.0;
                image.normal: "ic_search_white_24dp_2x.png";
-               rel1.relative: 0.325 0.85;
-               rel2.relative: 0.475 1.0;
+               rel1.to: "part.web.btn.search";
+               rel1.relative: 0.4 0;
+               rel2.to: "part.web.btn.search";
+               max: 35 35;
             }
          }
          part {
@@ -119,8 +123,10 @@ collections {
             description {
                state: "default" 0.0;
                image.normal: "ic_bookmark_white_24dp_2x.png";
-               rel1.relative: 0.525 0.85;
-               rel2.relative: 0.675 1.0;
+               rel1.to: "part.web.btn.bookmark";
+               rel1.relative: -0.4 0;
+               rel2.to: "part.web.btn.bookmark";
+               max: 35 35;
             }
          }
          part {

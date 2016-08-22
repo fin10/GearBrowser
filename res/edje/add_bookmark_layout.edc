@@ -1,28 +1,32 @@
 collections {
+   color_classes {
+      color_class {
+         name: "default_color";
+         color: 255 255 255 40;
+      }
+      color_class {
+         name: "pressed_color";
+         color: 255 255 255 80;
+      }
+   }
+   
    group {
       name: "group.add_bookmark";
       parts {
-         part {
-            name: "part.add_bookmark.title.label";
-            type: TEXT;
-            description {
-               state: "default" 0.0;
-               rel1.relative: 0.1 0.05;
-               rel2.relative: 0.9 0.2;
-               text {
-                  text: "Title";
-                  size: 24;
-               }
-            }
-         }
          part {
             name: "part.add_bookmark.title.btn";
             type: RECT;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.1 0.2;
-               rel2.relative: 0.9 0.35;
-               color: 255 255 255 40;
+               rel1.relative: 0.5 0.25;
+               rel2.relative: 0.5 0.25;
+               color_class: "default_color";
+               min: 260 50;
+            }
+            description {
+               state: "pressed" 0.0;
+               inherit: "default" 0.0;
+               color_class: "pressed_color";
             }
          }
          part {
@@ -31,23 +35,24 @@ collections {
             mouse_events: 0;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.08 0.2;
-               rel2.relative: 0.88 0.35;
+               rel1.to: "part.add_bookmark.title.btn";
+               rel2.to: "part.add_bookmark.title.btn";
                text {
                   text: "title";
                   size: 26;
                }
             }
          }
-         part{
-            name: "part.add_bookmark.url.label";
+         part {
+            name: "part.add_bookmark.title.label";
             type: TEXT;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.1 0.35;
-               rel2.relative: 0.9 0.5;
+               rel1.to: "part.add_bookmark.title.btn";
+               rel1.relative: 0 -2;
+               rel2.to: "part.add_bookmark.title.btn";
                text {
-                  text: "Url";
+                  text: "Title";
                   size: 24;
                }
             }
@@ -57,9 +62,15 @@ collections {
             type: RECT;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.1 0.5;
-               rel2.relative: 0.9 0.65;
-               color: 255 255 255 40;
+               rel1.relative: 0.5 0.55;
+               rel2.relative: 0.5 0.55;
+               color_class: "default_color";
+               min: 260 50;
+            }
+            description {
+               state: "pressed" 0.0;
+               inherit: "default" 0.0;
+               color_class: "pressed_color";
             }
          }
          part {
@@ -68,11 +79,26 @@ collections {
             mouse_events: 0;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.08 0.5;
-               rel2.relative: 0.88 0.65;
+               rel1.to: "part.add_bookmark.url.btn";
+               rel2.to: "part.add_bookmark.url.btn";
                text {
                   text: "url";
                   size: 26;
+                  style: "slide_long";
+               }
+            }
+         }
+         part{
+            name: "part.add_bookmark.url.label";
+            type: TEXT;
+            description {
+               state: "default" 0.0;
+               rel1.to: "part.add_bookmark.url.btn";
+               rel1.relative: 0 -2;
+               rel2.to: "part.add_bookmark.url.btn";
+               text {
+                  text: "Url";
+                  size: 24;
                }
             }
          }
@@ -88,6 +114,36 @@ collections {
          }
       }
       programs {
+         program {
+            name: "program.add_bookmark.title.pressed";
+            source: "part.add_bookmark.title.btn";
+            signal: "mouse,down,1";
+            action: STATE_SET "pressed" 0.0;
+            target: "part.add_bookmark.title.btn";
+         }
+         program {
+            name: "program.add_bookmark.title.released";
+            source: "part.add_bookmark.title.btn";
+            signal: "mouse,up,1";
+            action: STATE_SET "default" 0.0;
+            target: "part.add_bookmark.title.btn";
+         }
+         program {
+            name: "program.add_bookmark.url.pressed";
+            source: "part.add_bookmark.url.btn";
+            signal: "mouse,down,1";
+            action: STATE_SET "pressed" 0.0;
+            target: "part.add_bookmark.url.btn";
+         }
+         program {
+            name: "program.add_bookmark.url.released";
+            source: "part.add_bookmark.url.btn";
+            signal: "mouse,up,1";
+            action: STATE_SET "default" 0.0;
+            target: "part.add_bookmark.url.btn";
+         }
+         
+         
          program {
             name: "program.add_bookmark.title.clicked";
             source: "part.add_bookmark.title.btn";

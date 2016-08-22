@@ -25,7 +25,6 @@ void
 web_layout_release(void) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_layout_release]");
 	if (gWebData != NULL) {
-		settings_value_set(PREF_KEY_LAST_URL, ewk_view_url_get(gWebData->web));
 		free(gWebData);
 		gWebData = NULL;
 	}
@@ -87,6 +86,14 @@ web_button_click_cb(void *data, Evas_Object *obj, const char *emission, const ch
 	}
 }
 
+static void
+web_url_change_cb(void *data, Evas_Object *obj, void *event_info) {
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_url_change_cb] %s", event_info);
+	if (event_info != NULL) {
+		settings_value_set(PREF_KEY_LAST_URL, event_info);
+	}
+}
+
 Elm_Object_Item*
 web_layout_open(Evas_Object *navi) {
 	if (gWebData != NULL) {
@@ -114,6 +121,8 @@ web_layout_open(Evas_Object *navi) {
 	gWebData = malloc(sizeof(WebData));
 	gWebData->navi = navi;
 	gWebData->web = web;
+
+	evas_object_smart_callback_add(web, "url,changed", web_url_change_cb, NULL);
 
 	return elm_naviframe_item_simple_push(navi, layout);
 }
