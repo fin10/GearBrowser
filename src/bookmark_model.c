@@ -1,25 +1,9 @@
-#include <app_preference.h>
 #include <dlog.h>
 #include <eina_types.h>
 #include <stdlib.h>
 #include "gearbrowser.h"
 #include "bookmark_model.h"
-
-static const char *PREF_KEY_BOOKMARKS = "pref_key_bookmarks";
-
-static const char*
-bookmark_model_get_json_n() {
-	char *json = NULL;
-	bool existing;
-	preference_is_existing(PREF_KEY_BOOKMARKS, &existing);
-	if (existing) {
-		preference_get_string(PREF_KEY_BOOKMARKS, &json);
-	} else {
-		json = strdup("[]");
-	}
-
-	return json;
-}
+#include "settings.h"
 
 Eina_Bool
 bookmark_model_add(const char *title, const char *url) {
@@ -27,7 +11,7 @@ bookmark_model_add(const char *title, const char *url) {
 
 	GError *error = NULL;
 	JsonParser *parser = json_parser_new();
-	const char *json = bookmark_model_get_json_n();
+	const char *json = settings_value_get_n(PREF_KEY_BOOKMARKS);
 	json_parser_load_from_data(parser, json, strlen(json), &error);
 	if (error) {
 		dlog_print(DLOG_ERROR, LOG_TAG, "[bookmark_model_add] %s", error);
@@ -45,7 +29,7 @@ bookmark_model_add(const char *title, const char *url) {
 		json_generator_set_root(generator, root);
 		gchar *result = json_generator_to_data(generator, NULL);
 		dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_model_add] json:%s", result);
-		int ret = preference_set_string(PREF_KEY_BOOKMARKS, result);
+		int ret = settings_value_set(PREF_KEY_BOOKMARKS, result);
 		if (ret == 0) return EINA_TRUE;
 		else dlog_print(DLOG_ERROR, LOG_TAG, "[bookmark_model_add] error_code:%d", ret);
 
@@ -68,7 +52,7 @@ bookmark_model_remove(BookmarkModel *item) {
 
 	GError *error = NULL;
 	JsonParser *parser = json_parser_new();
-	const char *json = bookmark_model_get_json_n();
+	const char *json = settings_value_get_n(PREF_KEY_BOOKMARKS);
 	json_parser_load_from_data(parser, json, strlen(json), &error);
 	if (error) {
 		dlog_print(DLOG_ERROR, LOG_TAG, "[bookmark_model_remove] %s", error);
@@ -91,7 +75,7 @@ bookmark_model_remove(BookmarkModel *item) {
 		json_generator_set_root(generator, root);
 		gchar *result = json_generator_to_data(generator, NULL);
 		dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_model_remove] json:%s", result);
-		int ret = preference_set_string(PREF_KEY_BOOKMARKS, result);
+		int ret = settings_value_set(PREF_KEY_BOOKMARKS, result);
 		if (ret == 0) return EINA_TRUE;
 		else dlog_print(DLOG_ERROR, LOG_TAG, "[bookmark_model_remove] error_code:%d", ret);
 
@@ -110,7 +94,7 @@ bookmark_model_remove(BookmarkModel *item) {
 
 GPtrArray*
 bookmark_model_get_list_n(void) {
-	const char *json = bookmark_model_get_json_n();
+	const char *json = settings_value_get_n(PREF_KEY_BOOKMARKS);
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_model_get_list_n] %s", json);
 
 	GPtrArray *items = g_ptr_array_new();
@@ -137,7 +121,7 @@ bookmark_model_get_list_n(void) {
 		json_node_free(root);
 	}
 
-	free(json);
+	free((void *)json);
 	g_object_unref(parser);
 	json = NULL;
 	parser = NULL;

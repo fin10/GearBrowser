@@ -1,18 +1,31 @@
 collections {
+   images {
+      image: "ic_search_white_24dp_2x.png" COMP;
+      image: "logo_google.png" COMP;
+      image: "logo_naver.png" COMP;
+   }
+   color_classes {
+      color_class {
+         name: "color_pressed";
+         color: 255 255 255 127;
+      }
+      color_class {
+         name: "color_transparent";
+         color: 0 0 0 0;
+      }
+   }
    group {
       name: "group.search";
       parts {
          part {
             name: "part.search.title";
-            type: TEXT;
+            type: IMAGE;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.0 0.0;
-               rel2.relative: 1.0 0.2;
-               text {
-                  text: "Search";
-                  size: 24;
-               }
+               rel1.relative: 0.5 0.1;
+               rel2.relative: 0.5 0.1;
+               min: 45 45;
+               image.normal: "ic_search_white_24dp_2x.png";
             }
          }
          part {
@@ -20,9 +33,10 @@ collections {
             type: RECT;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.2 0.2;
-               rel2.relative: 0.8 0.4;
+               rel1.relative: 0.5 0.25;
+               rel2.relative: 0.5 0.25;
                color: 255 255 255 40;
+               min: 240 45;
             }
          }
          part {
@@ -31,15 +45,17 @@ collections {
             mouse_events: 0;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.24 0.2;
-               rel2.relative: 0.76 0.4;
+               rel1.to: "part.search.btn.entry";
+               rel2.to: "part.search.btn.entry";
                text {
-                  text: "input...";
-                  size: 26;
+                  text: "Search";
+                  size: 24;
                }
+               min: 240 45;
             }
          }
-         part { name: "elm.swallow.button";
+         part {
+            name: "elm.swallow.button";
             type: SWALLOW;
             description { state: "default" 0.0;
                rel1.relative: 0.0 1.0;
@@ -49,14 +65,85 @@ collections {
                visible: 1;
             }
          }
-         
+         part {
+            name: "part.search.btn.google";
+            type: IMAGE;
+            description {
+               state: "default" 0.0;
+               rel1.relative: 0.3 0.5;
+               rel2.relative: 0.3 0.5;
+               min: 60 60;
+               image.normal: "logo_google.png";
+            }
+            description {
+               state: "selected" 0.0;
+               inherit: "default" 0.0;
+               min: 90 90;
+            }
+         }
+         part {
+            name: "part.search.btn.naver";
+            type: IMAGE;
+            description {
+               state: "default" 0.0;
+               rel1.relative: 0.7 0.5;
+               rel2.relative: 0.7 0.5;
+               min: 60 60;
+               image.normal: "logo_naver.png";
+            }
+            description {
+               state: "selected" 0.0;
+               inherit: "default" 0.0;
+               min: 90 90;
+            }
+         }
       }
       programs {
+         program {
+            name: "program.search.btn.google.normal";
+            source: "mycode";
+            signal: "signal,google,normal";
+            action: STATE_SET "default" 0.0;
+            target: "part.search.btn.google";
+         }
+         program {
+            name: "program.search.btn.google.selected";
+            source: "mycode";
+            signal: "signal,google,selected";
+            action: STATE_SET "selected" 0.0;
+            target: "part.search.btn.google";
+         }
+         program {
+            name: "program.search.btn.naver.normal";
+            source: "mycode";
+            signal: "signal,naver,normal";
+            action: STATE_SET "default" 0.0;
+            target: "part.search.btn.naver";
+         }
+         program {
+            name: "program.search.btn.naver.selected";
+            source: "mycode";
+            signal: "signal,naver,selected";
+            action: STATE_SET "selected" 0.0;
+            target: "part.search.btn.naver";
+         }
          program {
             name: "program.search.btn.entry.clicked";
             source: "part.search.btn.entry";
             signal: "mouse,clicked,1";
             action: SIGNAL_EMIT "signal.btn.entry.clicked" "*";
+         }
+         program {
+            name: "program.search.btn.google.clicked";
+            source: "part.search.btn.google";
+            signal: "mouse,clicked,1";
+            action: SIGNAL_EMIT "signal.btn.google.clicked" "*";
+         }
+         program {
+            name: "program.search.btn.naver.clicked";
+            source: "part.search.btn.naver";
+            signal: "mouse,clicked,1";
+            action: SIGNAL_EMIT "signal.btn.naver.clicked" "*";
          }
       }
    }

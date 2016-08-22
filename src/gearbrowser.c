@@ -8,6 +8,7 @@
 #include "gearbrowser.h"
 #include "utils.h"
 #include "web_layout.h"
+#include "settings.h"
 
 static void
 win_delete_request_cb(void *data, Evas_Object *obj, void *event_info) {
@@ -75,6 +76,7 @@ create_base_gui(AppData *appData) {
 
 static bool
 app_create(void *data) {
+	settings_init();
 	AppData *ad = data;
 	create_base_gui(ad);
 	return true;

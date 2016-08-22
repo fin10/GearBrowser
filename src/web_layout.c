@@ -7,6 +7,7 @@
 #include "search_layout.h"
 #include "bookmark_layout.h"
 #include "web_layout.h"
+#include "settings.h"
 
 static const char *SIGNAL_BACK_BUTTON_CLICKED = "signal.btn.back.clicked";
 static const char *SIGNAL_FORWARD_BUTTON_CLICKED = "signal.btn.forward.clicked";
@@ -24,6 +25,7 @@ void
 web_layout_release(void) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_layout_release]");
 	if (gWebData != NULL) {
+		settings_value_set(PREF_KEY_LAST_URL, ewk_view_url_get(gWebData->web));
 		free(gWebData);
 		gWebData = NULL;
 	}
@@ -102,7 +104,7 @@ web_layout_open(Evas_Object *navi) {
 	Evas *evas = evas_object_evas_get(layout);
 	Evas_Object *web = ewk_view_add(evas);
 	elm_object_part_content_set(layout, "part.web", web);
-	ewk_view_url_set(web, "http://www.google.com");
+	ewk_view_url_set(web, settings_value_get_n(PREF_KEY_LAST_URL));
 
 	elm_object_signal_callback_add(layout, SIGNAL_BACK_BUTTON_CLICKED, "*", web_button_click_cb, NULL);
 	elm_object_signal_callback_add(layout, SIGNAL_FORWARD_BUTTON_CLICKED, "*", web_button_click_cb, NULL);
