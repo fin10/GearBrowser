@@ -29,10 +29,12 @@ void
 bookmark_layout_release(void) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_layout_release]");
 	if (gBookmarkData != NULL) {
-		eext_circle_surface_del(gBookmarkData->surface);
-		gBookmarkData->surface = NULL;
+		unsigned int size = eina_array_count_get(gBookmarkData->items);
+		for (int i = 0; i < size; ++i) {
+			free(eina_array_data_get(gBookmarkData->items, i));
+		}
 		eina_array_free(gBookmarkData->items);
-		gBookmarkData->items = NULL;
+		eext_circle_surface_del(gBookmarkData->surface);
 		free(gBookmarkData);
 		gBookmarkData = NULL;
 	}
@@ -235,6 +237,10 @@ genlist_refresh(void) {
 	Evas_Object *genlist = gBookmarkData->genlist;
 	elm_genlist_clear(genlist);
 	if (gBookmarkData->items != NULL) {
+		unsigned int size = eina_array_count_get(gBookmarkData->items);
+		for (int i = 0; i < size; ++i) {
+			free(eina_array_data_get(gBookmarkData->items, i));
+		}
 		eina_array_free(gBookmarkData->items);
 		gBookmarkData->items = NULL;
 	}

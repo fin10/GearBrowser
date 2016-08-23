@@ -32,7 +32,6 @@ bookmark_model_add(const char *title, const char *url) {
 		dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_model_add] json:%s", result);
 		ret = settings_value_set(PREF_KEY_BOOKMARKS, result);
 
-		json_node_free(root);
 		g_object_unref(generator);
 		generator = NULL;
 	}
@@ -83,7 +82,6 @@ bookmark_model_remove(BookmarkModel *item) {
 		dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_model_remove] json:%s", result);
 		ret = settings_value_set(PREF_KEY_BOOKMARKS, result);
 
-		json_node_free(root);
 		g_object_unref(generator);
 		generator = NULL;
 	}
@@ -127,9 +125,6 @@ bookmark_model_get_list_n(void) {
 			eina_array_push(items, item);
 			dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_model_get_list_n] %d, %s, %s", i, item->title, item->url);
 		}
-
-		json_node_free(root);
-		root = NULL;
 	}
 
 	free((void *)json);
