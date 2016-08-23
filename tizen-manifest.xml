@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <manifest xmlns="http://tizen.org/ns/packages" api-version="2.3.1" package="com.fin10.tizen.gearbrowser" version="1.0.0">
+    <author email="fender64@gmail.com" href="https://github.com/fin10/GearBrowser">fin10</author>
     <profile name="wearable"/>
     <ui-application appid="com.fin10.tizen.gearbrowser" exec="gearbrowser" multiple="false" nodisplay="false" taskmanage="true" type="capp">
         <label>Gear Browser</label>
-        <icon>gearbrowser.png</icon>
+        <icon>ic_gear_browser_117x117.png</icon>
     </ui-application>
     <privileges>
         <privilege>http://tizen.org/privilege/internet</privilege>

@@ -4,11 +4,12 @@ collections {
       image: "ic_arrow_forward_white_24dp_2x.png" COMP;
       image: "ic_bookmark_white_24dp_2x.png" COMP;
       image: "ic_search_white_24dp_2x.png" COMP;
+      image: "ic_gear_browser_117x117.png" COMP;
    }
    color_classes {
       color_class {
          name: "color_pressed";
-         color: 255 255 255 127;
+         color: 103 58 183 127;
       }
       color_class {
          name: "color_transparent";
@@ -129,11 +130,27 @@ collections {
             }
          }
          part {
+            name: "part.web.btn.app.icon";
+            type: IMAGE;
+            mouse_events: 0;
+            description {
+               state: "default" 0.0;
+               image.normal: "ic_gear_browser_117x117.png";
+               rel1.to: "part.web";
+               rel1.relative: 0.5 0;
+               rel2.to: "part.web";
+               rel1.offset: 0 -24;
+               rel2.relative: 0.5 0;
+               rel2.offset: 0 -24;
+               min: 30 30;
+            }
+         }
+         part {
             name: "part.web";
             type: SWALLOW;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.12 0.10;
+               rel1.relative: 0.12 0.12;
                rel2.relative: 0.88 0.85;
             }
          }
