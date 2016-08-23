@@ -9,4 +9,6 @@
     <privileges>
         <privilege>http://tizen.org/privilege/internet</privilege>
     </privileges>
+    <feature name="http://tizen.org/feature/screen.size.normal">true</feature>
+    <feature name="http://tizen.org/feature/screen.shape.circle">true</feature>
 </manifest>
