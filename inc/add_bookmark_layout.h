@@ -4,7 +4,7 @@
 #include <Elementary.h>
 #include <bundle.h>
 
-void add_bookmark_layout_release(void);
+void add_bookmark_layout_destroy(void);
 Elm_Object_Item *add_bookmark_layout_open(Evas_Object *navi, bundle *result);
 
 #endif /* ADD_BOOKMARK_LAYOUT_H_ */

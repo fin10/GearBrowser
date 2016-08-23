@@ -1,5 +1,6 @@
 #include <Elementary.h>
 #include <EWebKit.h>
+#include <efl_extension.h>
 #include <bundle.h>
 #include <dlog.h>
 #include "gearbrowser.h"
@@ -17,14 +18,17 @@ static const char *SIGNAL_BOOKMARK_BUTTON_CLICKED = "signal.btn.bookmark.clicked
 typedef struct web_data {
 	Evas_Object *navi;
 	Evas_Object *web;
+	Evas_Object *progressbar;
+	Eext_Circle_Surface *surface;
 } WebData;
 
 WebData *gWebData = NULL;
 
 void
-web_layout_release(void) {
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_layout_release]");
+web_layout_destroy(void) {
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_layout_destroy]");
 	if (gWebData != NULL) {
+		eext_circle_surface_del(gWebData->surface);
 		free(gWebData);
 		gWebData = NULL;
 	}
@@ -43,7 +47,7 @@ search_result_cb(void *data, Elm_Object_Item *it) {
 
 	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
 	bundle_free(result);
-	search_layout_release();
+	search_layout_destroy();
 
 	return EINA_TRUE;
 }
@@ -51,17 +55,16 @@ search_result_cb(void *data, Elm_Object_Item *it) {
 static Eina_Bool
 bookmark_result_cb(void *data, Elm_Object_Item *it) {
 	bundle *result = data;
-	char *query = NULL, *action = NULL;
+	char *query = NULL;
 	bundle_get_str(result, "result", &query);
-	bundle_get_str(result, "action", &action);
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_result_cb] result:%s, action:%s", query, action);
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_result_cb] result:%s", query);
 	if (query != NULL) {
 		ewk_view_url_set(gWebData->web, query);
 	}
 
 	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
 	bundle_free(result);
-	bookmark_layout_release();
+	bookmark_layout_destroy();
 
 	return EINA_TRUE;
 }
@@ -94,12 +97,26 @@ web_url_change_cb(void *data, Evas_Object *obj, void *event_info) {
 	}
 }
 
+static void
+web_load_progress_cb(void *data, Evas_Object *obj, void *event_info) {
+	double *progress = event_info;
+	elm_progressbar_value_set(gWebData->progressbar, *progress);
+	if (*progress >= 1.0) {
+		elm_progressbar_value_set(gWebData->progressbar, 0);
+		evas_object_hide(gWebData->progressbar);
+	}
+	else evas_object_show(gWebData->progressbar);
+}
+
 Elm_Object_Item*
 web_layout_open(Evas_Object *navi) {
 	if (gWebData != NULL) {
 		dlog_print(DLOG_ERROR, LOG_TAG, "[web_layout_open] Do not allowed to open repeatedly.");
 		return NULL;
 	}
+
+	gWebData = malloc(sizeof(WebData));
+	gWebData->navi = navi;
 
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_layout_open]");
 	char edj_path[PATH_MAX] = {0, };
@@ -112,17 +129,19 @@ web_layout_open(Evas_Object *navi) {
 	Evas_Object *web = ewk_view_add(evas);
 	elm_object_part_content_set(layout, "part.web", web);
 	ewk_view_url_set(web, settings_value_get_n(PREF_KEY_LAST_URL));
+	gWebData->web = web;
 
 	elm_object_signal_callback_add(layout, SIGNAL_BACK_BUTTON_CLICKED, "*", web_button_click_cb, NULL);
 	elm_object_signal_callback_add(layout, SIGNAL_FORWARD_BUTTON_CLICKED, "*", web_button_click_cb, NULL);
 	elm_object_signal_callback_add(layout, SIGNAL_SEARCH_BUTTON_CLICKED, "*", web_button_click_cb, NULL);
 	elm_object_signal_callback_add(layout, SIGNAL_BOOKMARK_BUTTON_CLICKED, "*", web_button_click_cb, NULL);
 
-	gWebData = malloc(sizeof(WebData));
-	gWebData->navi = navi;
-	gWebData->web = web;
-
 	evas_object_smart_callback_add(web, "url,changed", web_url_change_cb, NULL);
+	evas_object_smart_callback_add(web, "load,progress", web_load_progress_cb, NULL);
+
+	Evas_Object *progressbar = elm_progressbar_add(layout);
+	elm_object_part_content_set(layout, "part.progress", progressbar);
+	gWebData->progressbar = progressbar;
 
 	return elm_naviframe_item_simple_push(navi, layout);
 }

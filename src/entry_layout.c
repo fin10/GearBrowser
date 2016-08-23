@@ -13,8 +13,8 @@ typedef struct entry_data {
 EntryData *gEntryData = NULL;
 
 void
-entry_layout_release(void) {
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[entry_layout_release]");
+entry_layout_destroy(void) {
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[entry_layout_destroy]");
 	if (gEntryData != NULL) {
 		free(gEntryData);
 		gEntryData = NULL;

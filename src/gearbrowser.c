@@ -35,7 +35,7 @@ static Eina_Bool
 web_close_cb(void *data, Elm_Object_Item *it) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_close_cb]");
 	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
-	web_layout_release();
+	web_layout_destroy();
 
 	return EINA_TRUE;
 }

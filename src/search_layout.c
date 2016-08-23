@@ -30,8 +30,8 @@ startsWith(const char *pre, const char *str) {
 }
 
 void
-search_layout_release(void) {
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[search_layout_release]");
+search_layout_destroy(void) {
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[search_layout_destroy]");
 	if (gSearchData != NULL) {
 		free(gSearchData);
 		gSearchData = NULL;
@@ -52,7 +52,7 @@ entry_result_cb(void *data, Elm_Object_Item *it) {
 
 	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
 	bundle_free(result);
-	entry_layout_release();
+	entry_layout_destroy();
 
 	return EINA_TRUE;
 }

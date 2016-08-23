@@ -26,8 +26,8 @@ BookmarkData *gBookmarkData = NULL;
 static void genlist_refresh(void);
 
 void
-bookmark_layout_release(void) {
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_layout_release]");
+bookmark_layout_destroy(void) {
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_layout_destroy]");
 	if (gBookmarkData != NULL) {
 		unsigned int size = eina_array_count_get(gBookmarkData->items);
 		for (int i = 0; i < size; ++i) {
@@ -123,7 +123,7 @@ add_bookmark_result_cb(void *data, Elm_Object_Item *it) {
 	bundle *result = data;
 	bundle_free(result);
 	elm_naviframe_item_pop_cb_set(it, NULL, NULL);
-	add_bookmark_layout_release();
+	add_bookmark_layout_destroy();
 	eext_more_option_opened_set(gBookmarkData->moreOption, EINA_FALSE);
 	genlist_refresh();
 
