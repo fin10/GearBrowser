@@ -12,6 +12,10 @@ collections {
          color: 103 58 183 127;
       }
       color_class {
+         name: "color_disabled";
+         color: 255 255 255 97;
+      }
+      color_class {
          name: "color_transparent";
          color: 0 0 0 0;
       }
@@ -45,6 +49,11 @@ collections {
                rel2.to: "part.web.btn.back";
                max: 35 35;
             }
+            description { 
+               state: "disabled" 0.0;
+               inherit: "default" 0.0;
+               color_class: "color_disabled";
+            }
          }
          part {
             name: "part.web.btn.forward";
@@ -71,6 +80,11 @@ collections {
                rel1.to: "part.web.btn.forward";
                rel2.to: "part.web.btn.forward";
                max: 35 35;
+            }
+            description {
+               state: "disabled" 0.0;
+               inherit: "default" 0.0;
+               color_class: "color_disabled";
             }
          }
          part {
@@ -170,6 +184,35 @@ collections {
       }
       programs {
          program {
+            name: "program.web.btn.back.enabled";
+            source: "mycode";
+            signal: "signal,back,enabled";
+            action: STATE_SET "default" 0.0;
+            target: "part.web.btn.back.icon";
+         }
+         program {
+            name: "program.web.btn.back.disabled";
+            source: "mycode";
+            signal: "signal,back,disabled";
+            action: STATE_SET "disabled" 0.0;
+            target: "part.web.btn.back.icon";
+         }
+         program {
+            name: "program.web.btn.forward.enabled";
+            source: "mycode";
+            signal: "signal,forward,enabled";
+            action: STATE_SET "default" 0.0;
+            target: "part.web.btn.forward.icon";
+         }
+         program {
+            name: "program.web.btn.forward.disabled";
+            source: "mycode";
+            signal: "signal,forward,disabled";
+            action: STATE_SET "disabled" 0.0;
+            target: "part.web.btn.forward.icon";
+         }
+         
+         program {
             name: "program.web.btn.back.pressed";
             source: "part.web.btn.back";
             signal: "mouse,down,1";
@@ -205,7 +248,7 @@ collections {
             target: "part.web.btn.search";
          }
          program {
-            name: "program.web.btn.searchreleased";
+            name: "program.web.btn.search.released";
             source: "part.web.btn.search";
             signal: "mouse,up,1";
             action: STATE_SET "default" 0.0;

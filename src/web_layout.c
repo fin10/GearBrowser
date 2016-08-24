@@ -18,8 +18,8 @@ static const char *SIGNAL_BOOKMARK_BUTTON_CLICKED = "signal.btn.bookmark.clicked
 typedef struct web_data {
 	Evas_Object *navi;
 	Evas_Object *web;
+	Evas_Object *layout;
 	Evas_Object *progressbar;
-	Eext_Circle_Surface *surface;
 } WebData;
 
 WebData *gWebData = NULL;
@@ -28,7 +28,6 @@ void
 web_layout_destroy(void) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_layout_destroy]");
 	if (gWebData != NULL) {
-		eext_circle_surface_del(gWebData->surface);
 		free(gWebData);
 		gWebData = NULL;
 	}
@@ -108,6 +107,19 @@ web_load_progress_cb(void *data, Evas_Object *obj, void *event_info) {
 	else evas_object_show(gWebData->progressbar);
 }
 
+static void
+web_load_finished_cb(void *data, Evas_Object *obj, void *event_info) {
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_load_finished_cb]");
+	const char *sig;
+	if (ewk_view_back_possible(gWebData->web)) sig = "signal,back,enabled";
+	else sig = "signal,back,disabled";
+	elm_layout_signal_emit(gWebData->layout, sig, "mycode");
+
+	if (ewk_view_forward_possible(gWebData->web)) sig = "signal,forward,enabled";
+	else sig = "signal,forward,disabled";
+	elm_layout_signal_emit(gWebData->layout, sig, "mycode");
+}
+
 Elm_Object_Item*
 web_layout_open(Evas_Object *navi) {
 	if (gWebData != NULL) {
@@ -124,6 +136,7 @@ web_layout_open(Evas_Object *navi) {
 
 	Evas_Object *layout = elm_layout_add(navi);
 	elm_layout_file_set(layout, edj_path, "group.web");
+	gWebData->layout = layout;
 
 	Evas *evas = evas_object_evas_get(layout);
 	Evas_Object *web = ewk_view_add(evas);
@@ -138,6 +151,7 @@ web_layout_open(Evas_Object *navi) {
 
 	evas_object_smart_callback_add(web, "url,changed", web_url_change_cb, NULL);
 	evas_object_smart_callback_add(web, "load,progress", web_load_progress_cb, NULL);
+	evas_object_smart_callback_add(web, "load,finished", web_load_finished_cb, NULL);
 
 	Evas_Object *progressbar = elm_progressbar_add(layout);
 	elm_object_part_content_set(layout, "part.progress", progressbar);
