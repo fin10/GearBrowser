@@ -144,6 +144,9 @@ web_layout_open(Evas_Object *navi) {
 	ewk_view_url_set(web, settings_value_get_n(PREF_KEY_LAST_URL));
 	gWebData->web = web;
 
+	elm_layout_signal_emit(gWebData->layout, "signal,back,disabled", "mycode");
+	elm_layout_signal_emit(gWebData->layout, "signal,forward,disabled", "mycode");
+
 	elm_object_signal_callback_add(layout, SIGNAL_BACK_BUTTON_CLICKED, "*", web_button_click_cb, NULL);
 	elm_object_signal_callback_add(layout, SIGNAL_FORWARD_BUTTON_CLICKED, "*", web_button_click_cb, NULL);
 	elm_object_signal_callback_add(layout, SIGNAL_SEARCH_BUTTON_CLICKED, "*", web_button_click_cb, NULL);

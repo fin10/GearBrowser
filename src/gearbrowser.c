@@ -24,7 +24,7 @@ win_back_cb(void *data, Evas_Object *obj, void *event_info) {
 	if (items != NULL) {
 		dlog_print(DLOG_DEBUG, LOG_TAG, "[win_back_cb] count:%d", items->accounting->count);
 		if (items->accounting->count == 1) {
-			elm_win_lower(ad->win);
+			ui_app_exit();
 		} else {
 			elm_naviframe_item_pop(ad->navi);
 		}
