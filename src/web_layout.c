@@ -163,4 +163,16 @@ web_layout_open(Evas_Object *navi) {
 	return elm_naviframe_item_simple_push(navi, layout);
 }
 
+void
+web_layout_pause(void) {
+	if (gWebData != NULL) {
+		ewk_view_suspend(gWebData->web);
+	}
+}
 
+void
+web_layout_resume(void) {
+	if (gWebData != NULL) {
+		ewk_view_resume(gWebData->web);
+	}
+}

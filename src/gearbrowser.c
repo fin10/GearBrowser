@@ -42,8 +42,6 @@ web_close_cb(void *data, Elm_Object_Item *it) {
 
 static void
 create_base_gui(AppData *appData) {
-	dlog_print(DLOG_DEBUG, LOG_TAG, "[create_base_gui]");
-
 	/* Window */
 	appData->win = elm_win_util_standard_add(PACKAGE, PACKAGE);
 	elm_win_autodel_set(appData->win, EINA_TRUE);
@@ -89,12 +87,14 @@ app_control(app_control_h app_control, void *data) {
 
 static void
 app_pause(void *data) {
-	/* Take necessary actions when application becomes invisible. */
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[app_pause]");
+	web_layout_pause();
 }
 
 static void
 app_resume(void *data) {
-	/* Take necessary actions when application becomes visible. */
+	dlog_print(DLOG_DEBUG, LOG_TAG, "[app_resume]");
+	web_layout_resume();
 }
 
 static void
