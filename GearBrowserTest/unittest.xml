@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<tizen_unittest>
+<targetProject>GearBrowser</targetProject>
+<targetFile>gearbrowser.c</targetFile>
+<targetObjectFile>C:/Users/fin10/workspaceForTizen/GearBrowser/GearBrowser/Debug/src/add_bookmark_layout.o</targetObjectFile>
+<targetObjectFile>C:/Users/fin10/workspaceForTizen/GearBrowser/GearBrowser/Debug/src/bookmark_layout.o</targetObjectFile>
+<targetObjectFile>C:/Users/fin10/workspaceForTizen/GearBrowser/GearBrowser/Debug/src/bookmark_model.o</targetObjectFile>
+<targetObjectFile>C:/Users/fin10/workspaceForTizen/GearBrowser/GearBrowser/Debug/src/entry_layout.o</targetObjectFile>
+<targetObjectFile>C:/Users/fin10/workspaceForTizen/GearBrowser/GearBrowser/Debug/src/search_layout.o</targetObjectFile>
+<targetObjectFile>C:/Users/fin10/workspaceForTizen/GearBrowser/GearBrowser/Debug/src/settings.o</targetObjectFile>
+<targetObjectFile>C:/Users/fin10/workspaceForTizen/GearBrowser/GearBrowser/Debug/src/utils.o</targetObjectFile>
+<targetObjectFile>C:/Users/fin10/workspaceForTizen/GearBrowser/GearBrowser/Debug/src/web_layout.o</targetObjectFile>
+</tizen_unittest>
