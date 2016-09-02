@@ -103,8 +103,7 @@ add_bookmark_layout_open(Evas_Object *navi, bundle *result) {
 	bundle_get_str(result, "url", &gAddBookmarkData->url);
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[add_bookmark_layout_open] %s, %s", gAddBookmarkData->title, gAddBookmarkData->url);
 
-	char edj_path[PATH_MAX] = {0, };
-	app_get_resource("edje/add_bookmark_layout.edj", edj_path);
+	const char *edj_path = app_get_resource_n("edje/add_bookmark_layout.edj");
 
 	Evas_Object *layout = elm_layout_add(navi);
 	elm_layout_file_set(layout, edj_path, "group.add_bookmark");

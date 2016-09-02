@@ -131,8 +131,7 @@ web_layout_open(Evas_Object *navi) {
 	gWebData->navi = navi;
 
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_layout_open]");
-	char edj_path[PATH_MAX] = {0, };
-	app_get_resource("edje/web_layout.edj", edj_path);
+	const char *edj_path = app_get_resource_n("edje/web_layout.edj");
 
 	Evas_Object *layout = elm_layout_add(navi);
 	elm_layout_file_set(layout, edj_path, "group.web");

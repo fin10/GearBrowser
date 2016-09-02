@@ -37,8 +37,7 @@ entry_layout_open(Evas_Object *navi, bundle *result) {
 		return NULL;
 	}
 
-	char edj_path[PATH_MAX] = {0, };
-	app_get_resource("edje/entry_layout.edj", edj_path);
+	const char *edj_path = app_get_resource_n("edje/entry_layout.edj");
 
 	Evas_Object *layout = elm_layout_add(navi);
 	elm_layout_file_set(layout, edj_path, "group.entry");

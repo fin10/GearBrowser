@@ -14,6 +14,11 @@ settings_init(void) {
 	if (!existing) preference_set_string(PREF_KEY_LAST_URL, "http://www.google.com");
 }
 
+int
+settings_clear(void) {
+	return preference_remove_all();
+}
+
 const char *
 settings_value_get_n(const char *key) {
 	char *value = NULL;

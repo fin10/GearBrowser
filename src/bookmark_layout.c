@@ -95,8 +95,7 @@ delete_popup_open(BookmarkModel *model) {
 	elm_object_part_content_set(popup, "button1", btn);
 	evas_object_smart_callback_add(btn, "clicked", delete_popup_hide_cb, popup);
 
-	char img_path[PATH_MAX] = {0, };
-	app_get_resource("image/tw_ic_popup_btn_delete.png", img_path);
+	const char *img_path = app_get_resource_n("image/tw_ic_popup_btn_delete.png");
 	Evas_Object *icon = elm_image_add(btn);
 	elm_image_file_set(icon, img_path, NULL);
 	evas_object_size_hint_weight_set(icon, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
@@ -108,7 +107,7 @@ delete_popup_open(BookmarkModel *model) {
 	elm_object_part_content_set(popup, "button2", btn);
 	evas_object_smart_callback_add(btn, "clicked", delete_popup_ok_cb, popup);
 
-	app_get_resource("image/tw_ic_popup_btn_check.png", img_path);
+	img_path = app_get_resource_n("image/tw_ic_popup_btn_check.png");
 	icon = elm_image_add(btn);
 	elm_image_file_set(icon, img_path, NULL);
 	evas_object_size_hint_weight_set(icon, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
@@ -155,8 +154,7 @@ create_more_option(Evas_Object* parent) {
 	eext_more_option_item_part_text_set(item, "selector,main_text", "Add");
 
 	Evas_Object *img = elm_image_add(moreOption);
-	char add_img_path[PATH_MAX] = {0, };
-	app_get_resource("image/add.png", add_img_path);
+	const char *add_img_path = app_get_resource_n("image/add.png");
 	elm_image_file_set(img, add_img_path, NULL);
 	eext_more_option_item_part_content_set(item, "item,icon", img);
 
@@ -164,8 +162,7 @@ create_more_option(Evas_Object* parent) {
 	eext_more_option_item_part_text_set(item, "selector,main_text", "Delete");
 
 	img = elm_image_add(moreOption);
-	char delete_img_path[PATH_MAX] = {0, };
-	app_get_resource("image/delete.png", delete_img_path);
+	const char *delete_img_path = app_get_resource_n("image/delete.png");
 	elm_image_file_set(img, delete_img_path, NULL);
 	eext_more_option_item_part_content_set(item, "item,icon", img);
 
@@ -219,8 +216,7 @@ create_empty_layout(Evas_Object *parent) {
 	Evas_Object *layout = elm_layout_add(parent);
 	elm_layout_theme_set(layout, "layout", "nocontents", "default");
 
-	char img_path[PATH_MAX] = {0, };
-	app_get_resource("image/ic_bookmark_white_48dp.png", img_path);
+	const char *img_path = app_get_resource_n("image/ic_bookmark_white_48dp.png");
 
 	Evas_Object *img = elm_image_add(parent);
 	elm_image_file_set(img, img_path, NULL);
@@ -299,8 +295,7 @@ bookmark_layout_open(Evas_Object *navi, bundle *result) {
 	bundle_get_str(result, "url", &gBookmarkData->url);
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[bookmark_layout_open] %s, %s", gBookmarkData->title, gBookmarkData->url);
 
-	char edj_path[PATH_MAX] = {0, };
-	app_get_resource("edje/bookmark_layout.edj", edj_path);
+	const char *edj_path = app_get_resource_n("edje/bookmark_layout.edj");
 
 	Evas_Object *layout = elm_layout_add(navi);
 	elm_layout_file_set(layout, edj_path, "group.bookmark");

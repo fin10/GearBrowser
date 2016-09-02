@@ -7,6 +7,7 @@ static const char *PREF_KEY_LAST_SEARCH_KEYWORD = "pref_key_last_search_keyword"
 static const char *PREF_KEY_LAST_URL = "pref_key_last_url";
 
 void settings_init(void);
+int settings_clear(void);
 const char *settings_value_get_n(const char *key);
 int settings_value_set(const char *key, const char *value);
 
