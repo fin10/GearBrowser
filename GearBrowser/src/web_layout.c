@@ -28,6 +28,7 @@ void
 web_layout_destroy(void) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_layout_destroy]");
 	if (gWebData != NULL) {
+		ewk_shutdown();
 		free(gWebData);
 		gWebData = NULL;
 	}
@@ -136,6 +137,8 @@ web_layout_open(Evas_Object *navi) {
 	Evas_Object *layout = elm_layout_add(navi);
 	elm_layout_file_set(layout, edj_path, "group.web");
 	gWebData->layout = layout;
+
+	ewk_init();
 
 	Evas *evas = evas_object_evas_get(layout);
 	Evas_Object *web = ewk_view_add(evas);
