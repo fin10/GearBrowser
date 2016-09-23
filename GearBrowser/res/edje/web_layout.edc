@@ -167,6 +167,11 @@ collections {
                rel1.relative: 0.12 0.12;
                rel2.relative: 0.88 0.85;
             }
+            description { 
+               state: "full" 0.0;
+               rel1.relative: 0 0;
+               rel2.relative: 1 1;
+            }
          }
          part {
             name: "part.progress";
@@ -183,6 +188,20 @@ collections {
          }
       }
       programs {
+         program { 
+            name: "program.web.screen.normal";
+            source: "mycode";
+            signal: "signal,screen,normal";
+            action: STATE_SET "default" 0.0;
+            target: "part.web";
+         }
+         program { 
+            name: "program.web.screen.full";
+            source: "mycode";
+            signal: "signal,screen,full";
+            action: STATE_SET "full" 0.0;
+            target: "part.web";
+         }
          program {
             name: "program.web.btn.back.enabled";
             source: "mycode";
@@ -211,7 +230,7 @@ collections {
             action: STATE_SET "disabled" 0.0;
             target: "part.web.btn.forward.icon";
          }
-         
+
          program {
             name: "program.web.btn.back.pressed";
             source: "part.web.btn.back";

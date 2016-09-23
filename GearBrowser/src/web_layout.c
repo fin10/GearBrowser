@@ -15,6 +15,8 @@ static const char *SIGNAL_FORWARD_BUTTON_CLICKED = "signal.btn.forward.clicked";
 static const char *SIGNAL_SEARCH_BUTTON_CLICKED = "signal.btn.search.clicked";
 static const char *SIGNAL_BOOKMARK_BUTTON_CLICKED = "signal.btn.bookmark.clicked";
 
+static Eina_Bool web_rotary_event_cb(void *data, Eext_Rotary_Event_Info *ev);
+
 typedef struct web_data {
 	Evas_Object *navi;
 	Evas_Object *web;
@@ -28,6 +30,7 @@ void
 web_layout_destroy(void) {
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_layout_destroy]");
 	if (gWebData != NULL) {
+		eext_rotary_event_handler_del(web_rotary_event_cb);
 		ewk_shutdown();
 		free(gWebData);
 		gWebData = NULL;
@@ -121,6 +124,17 @@ web_load_finished_cb(void *data, Evas_Object *obj, void *event_info) {
 	elm_layout_signal_emit(gWebData->layout, sig, "mycode");
 }
 
+static Eina_Bool
+web_rotary_event_cb(void *data, Eext_Rotary_Event_Info *ev) {
+   if (ev->direction == EEXT_ROTARY_DIRECTION_CLOCKWISE) {
+	   elm_layout_signal_emit(gWebData->layout, "signal,screen,full", "mycode");
+   } else {
+	   elm_layout_signal_emit(gWebData->layout, "signal,screen,normal", "mycode");
+   }
+
+   return EINA_FALSE;
+}
+
 Elm_Object_Item*
 web_layout_open(Evas_Object *navi) {
 	if (gWebData != NULL) {
@@ -157,6 +171,8 @@ web_layout_open(Evas_Object *navi) {
 	evas_object_smart_callback_add(web, "url,changed", web_url_change_cb, NULL);
 	evas_object_smart_callback_add(web, "load,progress", web_load_progress_cb, NULL);
 	evas_object_smart_callback_add(web, "load,finished", web_load_finished_cb, NULL);
+
+	eext_rotary_event_handler_add(web_rotary_event_cb, NULL);
 
 	Evas_Object *progressbar = elm_progressbar_add(layout);
 	elm_object_part_content_set(layout, "part.progress", progressbar);
