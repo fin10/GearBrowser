@@ -92,8 +92,12 @@ collections {
             type: RECT;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.15 0.85;
-               rel2.relative: 0.5 1.0;
+               rel1.to: "part.web";
+               rel1.relative: 0.05 1.0;
+               rel1.offset: 0 0;
+               rel2.to: "part.web";
+               rel2.relative: 0.5 1.2;
+               rel2.offset: 0 0;
                color_class: "color_transparent";
             }
             description {
@@ -120,8 +124,12 @@ collections {
             type: RECT;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.5 0.85;
-               rel2.relative: 0.85 1.0;
+               rel1.to: "part.web";
+               rel1.relative: 0.5 1.0;
+               rel1.offset: 0 0;
+               rel2.to: "part.web";
+               rel2.relative: 1.0 1.2;
+               rel2.offset: 0 0;
                color_class: "color_transparent";
             }
             description {
@@ -168,6 +176,11 @@ collections {
                rel2.relative: 0.88 0.85;
             }
             description { 
+               state: "half" 0.0;
+               rel1.relative: 0 0.1;
+               rel2.relative: 1 0.9;
+            }
+            description { 
                state: "full" 0.0;
                rel1.relative: 0 0;
                rel2.relative: 1 1;
@@ -193,6 +206,13 @@ collections {
             source: "mycode";
             signal: "signal,screen,normal";
             action: STATE_SET "default" 0.0;
+            target: "part.web";
+         }
+         program { 
+            name: "program.web.screen.half";
+            source: "mycode";
+            signal: "signal,screen,half";
+            action: STATE_SET "half" 0.0;
             target: "part.web";
          }
          program { 

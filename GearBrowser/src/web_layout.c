@@ -22,6 +22,7 @@ typedef struct web_data {
 	Evas_Object *web;
 	Evas_Object *layout;
 	Evas_Object *progressbar;
+	int screen_mode;
 } WebData;
 
 WebData *gWebData = NULL;
@@ -126,10 +127,28 @@ web_load_finished_cb(void *data, Evas_Object *obj, void *event_info) {
 
 static Eina_Bool
 web_rotary_event_cb(void *data, Eext_Rotary_Event_Info *ev) {
-   if (ev->direction == EEXT_ROTARY_DIRECTION_CLOCKWISE) {
-	   elm_layout_signal_emit(gWebData->layout, "signal,screen,full", "mycode");
-   } else {
-	   elm_layout_signal_emit(gWebData->layout, "signal,screen,normal", "mycode");
+   switch(gWebData->screen_mode) {
+   case 0:
+	   if (ev->direction == EEXT_ROTARY_DIRECTION_CLOCKWISE) {
+		   elm_layout_signal_emit(gWebData->layout, "signal,screen,half", "mycode");
+		   gWebData->screen_mode = 1;
+	   }
+	   break;
+   case 1:
+	   if (ev->direction == EEXT_ROTARY_DIRECTION_CLOCKWISE) {
+		   elm_layout_signal_emit(gWebData->layout, "signal,screen,full", "mycode");
+		   gWebData->screen_mode = 2;
+	   } else {
+		   elm_layout_signal_emit(gWebData->layout, "signal,screen,normal", "mycode");
+		   gWebData->screen_mode = 0;
+	   }
+	   break;
+   case 2:
+	   if (ev->direction == EEXT_ROTARY_DIRECTION_COUNTER_CLOCKWISE) {
+		   elm_layout_signal_emit(gWebData->layout, "signal,screen,half", "mycode");
+		   gWebData->screen_mode = 1;
+	   }
+	   break;
    }
 
    return EINA_FALSE;
@@ -144,6 +163,7 @@ web_layout_open(Evas_Object *navi) {
 
 	gWebData = malloc(sizeof(WebData));
 	gWebData->navi = navi;
+	gWebData->screen_mode = 0;
 
 	dlog_print(DLOG_DEBUG, LOG_TAG, "[web_layout_open]");
 	const char *edj_path = app_get_resource_n("edje/web_layout.edj");
