@@ -161,10 +161,10 @@ collections {
                rel1.to: "part.web";
                rel1.relative: 0.5 0;
                rel2.to: "part.web";
-               rel1.offset: 0 -24;
+               rel1.offset: 0 -26;
                rel2.relative: 0.5 0;
-               rel2.offset: 0 -24;
-               min: 30 30;
+               rel2.offset: 0 -26;
+               min: 28 28;
             }
          }
          part {
@@ -193,9 +193,9 @@ collections {
             description {
                state: "default" 0.0;
                rel1.to: "part.web";
-               rel1.relative: 0 0;
+               rel1.relative: 0 -0.02;
                rel2.to: "part.web";
-               rel2.relative: 1 0.02;
+               rel2.relative: 1 0;
                fixed: 1 1;
             }
          }

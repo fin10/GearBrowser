@@ -3,6 +3,7 @@ collections {
       image: "ic_search_white_24dp_2x.png" COMP;
       image: "logo_google.png" COMP;
       image: "logo_naver.png" COMP;
+      image: "logo_baidu.png" COMP;
    }
    color_classes {
       color_class {
@@ -75,8 +76,8 @@ collections {
             type: IMAGE;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.35 0.5;
-               rel2.relative: 0.35 0.5;
+               rel1.relative: 0.25 0.5;
+               rel2.relative: 0.25 0.5;
                min: 45 45;
                image.normal: "logo_google.png";
             }
@@ -91,10 +92,26 @@ collections {
             type: IMAGE;
             description {
                state: "default" 0.0;
-               rel1.relative: 0.65 0.5;
-               rel2.relative: 0.65 0.5;
+               rel1.relative: 0.5 0.5;
+               rel2.relative: 0.5 0.5;
                min: 45 45;
                image.normal: "logo_naver.png";
+            }
+            description {
+               state: "selected" 0.0;
+               inherit: "default" 0.0;
+               min: 80 80;
+            }
+         }
+         part {
+            name: "part.search.btn.baidu";
+            type: IMAGE;
+            description {
+               state: "default" 0.0;
+               rel1.relative: 0.75 0.5;
+               rel2.relative: 0.75 0.5;
+               min: 45 45;
+               image.normal: "logo_baidu.png";
             }
             description {
                state: "selected" 0.0;
@@ -147,6 +164,20 @@ collections {
             target: "part.search.btn.naver";
          }
          program {
+            name: "program.search.btn.baidu.normal";
+            source: "mycode";
+            signal: "signal,baidu,normal";
+            action: STATE_SET "default" 0.0;
+            target: "part.search.btn.baidu";
+         }
+         program {
+            name: "program.search.btn.baidu.selected";
+            source: "mycode";
+            signal: "signal,baidu,selected";
+            action: STATE_SET "selected" 0.0;
+            target: "part.search.btn.baidu";
+         }
+         program {
             name: "program.search.btn.entry.clicked";
             source: "part.search.btn.entry";
             signal: "mouse,clicked,1";
@@ -163,6 +194,12 @@ collections {
             source: "part.search.btn.naver";
             signal: "mouse,clicked,1";
             action: SIGNAL_EMIT "signal.btn.naver.clicked" "*";
+         }
+         program {
+            name: "program.search.btn.baidu.clicked";
+            source: "part.search.btn.baidu";
+            signal: "mouse,clicked,1";
+            action: SIGNAL_EMIT "signal.btn.baidu.clicked" "*";
          }
       }
    }

@@ -10,9 +10,11 @@
 static const char *SIGNAL_ENTRY_BUTTON_CLICKED = "signal.btn.entry.clicked";
 static const char *SIGNAL_GOOGLE_BUTTON_CLICKED = "signal.btn.google.clicked";
 static const char *SIGNAL_NAVER_BUTTON_CLICKED = "signal.btn.naver.clicked";
+static const char *SIGNAL_BAIDU_BUTTON_CLICKED = "signal.btn.baidu.clicked";
 
 static const char *URL_SEARCH_GOOGLE = "https://www.google.co.kr/search?q=";
 static const char *URL_SEARCH_NAVER = "https://m.search.naver.com/search.naver?query=";
+static const char *URL_SEARCH_BAIDU = "https://m.baidu.com/s?wd=";
 
 typedef struct search_data {
 	Evas_Object *navi;
@@ -82,21 +84,27 @@ button_click_cb(void *data, Evas_Object *obj, const char *emission, const char *
 	if (!strcmp(emission, SIGNAL_ENTRY_BUTTON_CLICKED)) {
 		bundle *result = bundle_create();
 		const char *text = elm_layout_text_get(gSearchData->layout, "part.search.text");
-		if (text != NULL) {
-			bundle_add_str(result, "text", text);
-		}
+		if (text != NULL) bundle_add_str(result, "text", text);
 
 		Elm_Object_Item *item = entry_layout_open(gSearchData->navi, result);
 		elm_naviframe_item_pop_cb_set(item, entry_result_cb, result);
 	} else if (!strcmp(emission, SIGNAL_GOOGLE_BUTTON_CLICKED)) {
 		elm_layout_signal_emit(gSearchData->layout, "signal,google,selected", "mycode");
 		elm_layout_signal_emit(gSearchData->layout, "signal,naver,normal", "mycode");
+		elm_layout_signal_emit(gSearchData->layout, "signal,baidu,normal", "mycode");
 		gSearchData->searchEngine = URL_SEARCH_GOOGLE;
 		settings_value_set(PREF_KEY_SEARCH_ENGINE, gSearchData->searchEngine);
 	} else if (!strcmp(emission, SIGNAL_NAVER_BUTTON_CLICKED)) {
 		elm_layout_signal_emit(gSearchData->layout, "signal,google,normal", "mycode");
 		elm_layout_signal_emit(gSearchData->layout, "signal,naver,selected", "mycode");
+		elm_layout_signal_emit(gSearchData->layout, "signal,baidu,normal", "mycode");
 		gSearchData->searchEngine = URL_SEARCH_NAVER;
+		settings_value_set(PREF_KEY_SEARCH_ENGINE, gSearchData->searchEngine);
+	} else if (!strcmp(emission, SIGNAL_BAIDU_BUTTON_CLICKED)) {
+		elm_layout_signal_emit(gSearchData->layout, "signal,google,normal", "mycode");
+		elm_layout_signal_emit(gSearchData->layout, "signal,naver,normal", "mycode");
+		elm_layout_signal_emit(gSearchData->layout, "signal,baidu,selected", "mycode");
+		gSearchData->searchEngine = URL_SEARCH_BAIDU;
 		settings_value_set(PREF_KEY_SEARCH_ENGINE, gSearchData->searchEngine);
 	}
 }
@@ -136,14 +144,21 @@ search_layout_open(Evas_Object *navi, bundle *result) {
 	elm_object_signal_callback_add(layout, SIGNAL_ENTRY_BUTTON_CLICKED, "*", button_click_cb, NULL);
 	elm_object_signal_callback_add(layout, SIGNAL_GOOGLE_BUTTON_CLICKED, "*", button_click_cb, NULL);
 	elm_object_signal_callback_add(layout, SIGNAL_NAVER_BUTTON_CLICKED, "*", button_click_cb, NULL);
+	elm_object_signal_callback_add(layout, SIGNAL_BAIDU_BUTTON_CLICKED, "*", button_click_cb, NULL);
 
 	gSearchData->searchEngine = settings_value_get_n(PREF_KEY_SEARCH_ENGINE);
 	if (!strcmp(gSearchData->searchEngine, URL_SEARCH_GOOGLE)) {
 		elm_layout_signal_emit(gSearchData->layout, "signal,google,selected", "mycode");
 		elm_layout_signal_emit(gSearchData->layout, "signal,naver,normal", "mycode");
+		elm_layout_signal_emit(gSearchData->layout, "signal,baidu,normal", "mycode");
 	} else if (!strcmp(gSearchData->searchEngine, URL_SEARCH_NAVER)) {
 		elm_layout_signal_emit(gSearchData->layout, "signal,google,normal", "mycode");
 		elm_layout_signal_emit(gSearchData->layout, "signal,naver,selected", "mycode");
+		elm_layout_signal_emit(gSearchData->layout, "signal,baidu,normal", "mycode");
+	} else if (!strcmp(gSearchData->searchEngine, URL_SEARCH_BAIDU)) {
+		elm_layout_signal_emit(gSearchData->layout, "signal,google,normal", "mycode");
+		elm_layout_signal_emit(gSearchData->layout, "signal,naver,normal", "mycode");
+		elm_layout_signal_emit(gSearchData->layout, "signal,baidu,selected", "mycode");
 	}
 
 	return elm_naviframe_item_simple_push(navi, layout);

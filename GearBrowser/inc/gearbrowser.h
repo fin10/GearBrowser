@@ -19,9 +19,4 @@ typedef struct app_data {
 	Evas_Object *navi;
 } AppData;
 
-typedef struct result_data {
-	const AppData *appData;
-	bundle *result;
-} ResultData;
-
 #endif /* __gearbrowser_H__ */
