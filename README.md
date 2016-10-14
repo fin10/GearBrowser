@@ -4,7 +4,7 @@ Enjoy web surfing via Gear S2!
 ## Features
 - Web browsing
 - Bookmark
-- Search via Google and Naver
+- Search via Google, Naver and Baidu
 - Full/Half screen mode via wheel gesture
 
 ## Screenshots
