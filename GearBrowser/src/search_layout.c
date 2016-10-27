@@ -12,7 +12,7 @@ static const char *SIGNAL_GOOGLE_BUTTON_CLICKED = "signal.btn.google.clicked";
 static const char *SIGNAL_NAVER_BUTTON_CLICKED = "signal.btn.naver.clicked";
 static const char *SIGNAL_BAIDU_BUTTON_CLICKED = "signal.btn.baidu.clicked";
 
-static const char *URL_SEARCH_GOOGLE = "https://www.google.co.kr/search?q=";
+static const char *URL_SEARCH_GOOGLE = "https://www.google.com/search?q=";
 static const char *URL_SEARCH_NAVER = "https://m.search.naver.com/search.naver?query=";
 static const char *URL_SEARCH_BAIDU = "https://m.baidu.com/s?wd=";
 

@@ -151,7 +151,7 @@ web_rotary_event_cb(void *data, Eext_Rotary_Event_Info *ev) {
 	   break;
    }
 
-   return EINA_FALSE;
+   return EINA_TRUE;
 }
 
 Elm_Object_Item*
